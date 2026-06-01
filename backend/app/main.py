@@ -9,6 +9,7 @@ from backend.app.services.trends_service import TrendsService
 from backend.app.services.market_service import MarketService
 from backend.app.services.report_service import ReportService
 from backend.app.services.tiktok_service import TikTokService
+from backend.app.services.local_ecom_service import LocalEcomService
 from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog
 
 app = FastAPI(title="Cross-border Export Intelligence API")
@@ -201,6 +202,11 @@ def get_ai_sourcing(category: str):
 def get_tiktok_videos(category: str = "portable power station"):
     videos = TikTokService.get_trending_videos(category)
     return {"status": "success", "videos": videos}
+
+@app.get("/api/ecom/trending")
+def get_local_ecom_trends():
+    trends = LocalEcomService.get_all_platforms()
+    return {"status": "success", "platforms": trends}
 
 if __name__ == "__main__":
     import uvicorn

@@ -34,4 +34,10 @@ class ApiService {
     final data = jsonDecode(response.body);
     return data['videos'];
   }
+
+  static Future<Map<String, dynamic>> fetchLocalEcomTrends() async {
+    final response = await http.get(Uri.parse('$baseUrl/ecom/trending'));
+    final data = jsonDecode(response.body);
+    return data['platforms'];
+  }
 }

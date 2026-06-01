@@ -78,6 +78,16 @@
                 <!-- Videos will be injected here -->
             </div>
         </div>
+
+        <!-- Local E-commerce Section -->
+        <div id="ecom-feed" class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span>🛒</span> 全球本土电商爆款
+            </h2>
+            <div id="ecom-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Regions will be injected here -->
+            </div>
+        </div>
     </main>
 
     <!-- AI Chat Floating Button -->
@@ -168,6 +178,32 @@
             } catch (e) { console.error(e); }
         }
 
+        async function fetchEcom() {
+            try {
+                const res = await fetch(`${API_BASE}/ecom/trending`);
+                const data = await res.json();
+                const grid = document.getElementById('ecom-grid');
+                grid.innerHTML = Object.entries(data.platforms).map(([region, items]) => `
+                    <div class="card p-6 rounded-2xl">
+                        <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                            <span>📍</span> ${region}
+                        </h3>
+                        <div class="space-y-4">
+                            ${items.map(item => `
+                                <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
+                                    <span class="text-2xl">${item.icon}</span>
+                                    <div>
+                                        <div class="text-sm font-bold">${item.product}</div>
+                                        <div class="text-xs text-gray-400">${item.platform} • 增长 ${item.growth}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
         function toggleChat() {
             const box = document.getElementById('chat-box');
             box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
@@ -195,6 +231,7 @@
 
         fetchMarket();
         fetchTikTok();
+        fetchEcom();
         setInterval(fetchMarket, 60000);
     </script>
 </body>

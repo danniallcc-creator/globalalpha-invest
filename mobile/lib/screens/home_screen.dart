@@ -58,6 +58,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _buildMarketTickerSection(),
               _buildHeroSection(),
               _buildFeatureGrid(context),
+              _buildLocalEcomSection(),
               _buildTikTokPreviewSection(),
               _buildRecentTrendsSection(),
             ],
@@ -67,20 +68,73 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildTikTokPreviewSection() {
+  Widget _buildLocalEcomSection() {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Padding(
           padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text('TikTok 爆火趋势', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-              Icon(Icons.play_circle_fill, color: Colors.pinkAccent),
-            ],
+          child: Text('本土电商爆款', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+        ),
+        Container(
+          height: 160,
+          child: FutureBuilder<Map<String, dynamic>>(
+            future: ApiService.fetchLocalEcomTrends(),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+              final platforms = snapshot.data!;
+              final allItems = [];
+              platforms.forEach((region, items) {
+                for (var item in items) {
+                  item['region'] = region;
+                  allItems.add(item);
+                }
+              });
+              
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                itemCount: allItems.length,
+                itemBuilder: (context, index) {
+                  final item = allItems[index];
+                  return Container(
+                    width: 200,
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.05),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.white.withOpacity(0.05)),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(item['icon'], style: TextStyle(fontSize: 24)),
+                            Container(
+                              padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(color: Colors.blueAccent.withOpacity(0.2), borderRadius: BorderRadius.circular(4)),
+                              child: Text(item['region'].split(' ')[0], style: TextStyle(fontSize: 8, color: Colors.blueAccent, fontWeight: FontWeight.bold)),
+                            ),
+                          ],
+                        ),
+                        SizedBox(height: 12),
+                        Text(item['product'], maxLines: 1, overflow: TextOverflow.ellipsis, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13)),
+                        SizedBox(height: 4),
+                        Text('${item['platform']} • 增长 ${item['growth']}', style: TextStyle(fontSize: 10, color: Colors.white38)),
+                      ],
+                    ),
+                  );
+                },
+              );
+            },
           ),
         ),
+      ],
+    );
+  }
         Container(
           height: 220,
           child: FutureBuilder<List<dynamic>>(
