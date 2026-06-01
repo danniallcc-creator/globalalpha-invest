@@ -114,12 +114,66 @@
         async function fetchMarket() {
             try {
                 const res = await fetch(`${API_BASE}/market`);
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change || '+0.5%'})`;
                 document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `<span>${f.pair}: ${f.rate.toFixed(2)}</span>`).join(' | ');
                 document.getElementById('last-update').innerText = `更新时间: ${new Date(data.last_update).toLocaleString()}`;
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.warn("Backend not reachable. Using Demo Data.");
+                document.getElementById('gold-price').innerText = `伦敦金: $2,345.67 (Demo)`;
+                document.getElementById('fx-rates').innerHTML = `USD/CNY: 7.24 | EUR/CNY: 7.85 | JPY/CNY: 0.046`;
+            }
         }
+
+        async function runCompass() {
+            const cat = document.getElementById('search-input').value;
+            if (!cat) return;
+            
+            try {
+                const res = await fetch(`${API_BASE}/compass?category=${cat}`);
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                
+                document.getElementById('results').classList.remove('hidden');
+                const renderList = (id, list) => {
+                    document.getElementById(id).innerHTML = list.map(c => `
+                        <div class="card p-4 rounded-xl">
+                            <div class="font-bold text-lg">${c.name}</div>
+                            <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
+                        </div>
+                    `).join('');
+                };
+                renderList('profit-list', data.recommendations.profit_market);
+                renderList('mass-list', data.recommendations.mass_market);
+                renderList('blue-list', data.recommendations.blue_ocean);
+
+                // Fetch Compliance
+                const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
+                const cData = await cRes.json();
+                if (cData.length > 0) {
+                    document.getElementById('compliance-section').classList.remove('hidden');
+                    const item = cData[0];
+                    document.getElementById('compliance-content').innerHTML = `
+                        <div class="border-r border-white/10 pr-8">
+                            <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
+                            <p class="text-gray-300 text-sm">${item.reason}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
+                            <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                alert("进入预览演示模式。请在本地启动后端以使用真实算法。");
+                document.getElementById('results').classList.remove('hidden');
+                document.getElementById('profit-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">德国 (Demo)</div>`;
+                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">美国 (Demo)</div>`;
+                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">巴西 (Demo)</div>`;
+            }
+        }
+
 
         async function runCompass() {
             const cat = document.getElementById('search-input').value;
