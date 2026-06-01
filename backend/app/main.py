@@ -170,15 +170,34 @@ def get_favorites(username: str, db: Session = Depends(get_db)):
 
 @app.get("/api/report/generate")
 def generate_report(category: str):
-    # Fetch data for the report
+    # 1. Fetch data for the report
     compass_data = get_compass(category)
     ai_insight = TrendsService.get_ai_insight(category)
     ecom_trends = LocalEcomService.get_all_platforms()
+    tiktok_trends = TikTokService.get_trending_videos(category)
+    
+    # 2. Get Compliance Data specific to this category
+    compliance_info = [
+        item for item in COMPLIANCE_DATA 
+        if any(word in item["category"].lower() for word in category.lower().split())
+    ]
+    
+    # 3. Get Market Details (Macro data for the report)
+    market_details = {}
+    for group in compass_data["recommendations"].values():
+        for country in group:
+            market_details[country["name"]] = {
+                "gdp": f"{country['gdp_per_capita'] / 1000:.1f}k",
+                "population": country["pop"]
+            }
     
     report_data = {
         "recommendations": compass_data["recommendations"],
         "ai_insight": ai_insight,
-        "ecom_trends": ecom_trends
+        "ecom_trends": ecom_trends,
+        "tiktok_trends": tiktok_trends,
+        "compliance_info": compliance_info,
+        "market_details": market_details
     }
     
     filename = f"{category.replace(' ', '_')}_report.pdf"

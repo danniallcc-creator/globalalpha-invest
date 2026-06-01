@@ -66,11 +66,18 @@
         </div>
 
         <!-- Compliance Section -->
-        <div id="compliance-section" class="card p-8 rounded-2xl mb-16 hidden">
+        <div id="compliance-section" class="card p-8 rounded-2xl mb-8 hidden">
             <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
                 <span>🛡️</span> 行业合规转型建议
             </h2>
             <div id="compliance-content" class="grid md:grid-cols-2 gap-8"></div>
+        </div>
+
+        <!-- Download Full Report Button -->
+        <div id="download-section" class="text-center mb-16 hidden">
+            <button id="dl-btn" onclick="downloadReport()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-full shadow-xl transition-all hover:scale-105">
+                下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)
+            </button>
         </div>
 
         <!-- TikTok Video Feed -->
@@ -163,6 +170,7 @@
             // Immediately show results container and scroll
             const resultsDiv = document.getElementById('results');
             resultsDiv.classList.remove('hidden');
+            document.getElementById('download-section').classList.remove('hidden');
             window.scrollTo({ top: resultsDiv.offsetTop - 100, behavior: 'smooth' });
 
             try {
@@ -222,6 +230,22 @@
                         <p class="text-gray-300 text-sm italic">建议针对当地能源政策开发“一键并网”套件，提高产品的技术壁垒和溢价空间。</p>
                     </div>
                 `;
+            }
+        }
+
+        async function downloadReport() {
+            const cat = document.getElementById('search-input').value;
+            if (!cat) return;
+            const btn = document.getElementById('dl-btn');
+            btn.innerHTML = "正在生成深度报告...";
+            try {
+                const res = await fetch(`${API_BASE}/report/generate?category=${cat}`);
+                const data = await res.json();
+                window.open(data.download_url);
+                btn.innerHTML = "下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)";
+            } catch (e) {
+                alert("生成失败。请确保后端服务已启动且网络连接正常。");
+                btn.innerHTML = "下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)";
             }
         }
 
