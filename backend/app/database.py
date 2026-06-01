@@ -14,7 +14,20 @@ class User(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
     password = Column(String)
+    role = Column(String, default="analyst") # analyst, manager, admin
+    company_id = Column(Integer, index=True) # For multi-tenant collaboration
     favorites = relationship("Favorite", back_populates="owner")
+    team_reports = relationship("TeamReport", back_populates="creator")
+
+class TeamReport(Base):
+    __tablename__ = "team_reports"
+    id = Column(Integer, primary_key=True, index=True)
+    category = Column(String)
+    filename = Column(String)
+    created_at = Column(String)
+    company_id = Column(Integer, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"))
+    creator = relationship("User", back_populates="team_reports")
 
 class Favorite(Base):
     __tablename__ = "favorites"

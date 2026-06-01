@@ -12,7 +12,8 @@ from backend.app.services.tiktok_service import TikTokService
 from backend.app.services.local_ecom_service import LocalEcomService
 from backend.app.services.competitor_service import CompetitorService
 from backend.app.services.customs_service import CustomsService
-from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog
+from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog, TeamReport
+from datetime import datetime
 
 app = FastAPI(title="Cross-border Export Intelligence API")
 
@@ -205,51 +206,43 @@ def get_full_intel(category: str):
     }
 
 @app.get("/api/report/generate")
-def generate_report(category: str):
+def generate_report(category: str, username: Optional[str] = "guest", db: Session = Depends(get_db)):
     # 1. Fetch data for the report
-    compass_data = get_compass(category)
-    ai_insight = TrendsService.get_ai_insight(category)
-    ecom_trends = LocalEcomService.get_all_platforms()
-    tiktok_trends = TikTokService.get_trending_videos(category)
-    pricing_analysis = CompetitorService.get_pricing_analysis(category)
-    customs_stats = CustomsService.get_customs_stats(category)
+    intel_data = get_full_intel(category)
     
-    # 2. Get Compliance Data specific to this category
-    compliance_info = [
-        item for item in COMPLIANCE_DATA 
-        if any(word in item["category"].lower() for word in category.lower().split())
-    ]
-    
-    # 3. Get Market Details (Macro data for the report)
-    market_details = {}
-    for group in compass_data["recommendations"].values():
-        for country in group:
-            market_details[country["name"]] = {
-                "gdp": f"{country['gdp_per_capita'] / 1000:.1f}k",
-                "population": country["pop"]
-            }
-    
-    report_data = {
-        "recommendations": compass_data["recommendations"],
-        "ai_insight": ai_insight,
-        "ecom_trends": ecom_trends,
-        "tiktok_trends": tiktok_trends,
-        "compliance_info": compliance_info,
-        "market_details": market_details,
-        "pricing_analysis": pricing_analysis,
-        "customs_stats": customs_stats
-    }
-    
-    filename = f"{category.replace(' ', '_')}_report.pdf"
+    filename = f"{category.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     file_path = f"static/reports/{filename}"
     
     # Generate actual PDF
-    ReportService.generate_pdf(category, report_data, file_path)
+    ReportService.generate_pdf(category, intel_data, file_path)
+    
+    # 2. Save to Enterprise Team Library if user exists
+    user = db.query(User).filter(User.username == username).first()
+    if user:
+        new_report = TeamReport(
+            category=category,
+            filename=filename,
+            created_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+            company_id=user.company_id,
+            user_id=user.id
+        )
+        db.add(new_report)
+        db.commit()
     
     return {
         "status": "success", 
-        "download_url": f"http://localhost:8000/reports/{filename}"
+        "download_url": f"http://localhost:8000/reports/{filename}",
+        "filename": filename
     }
+
+@app.get("/api/team/reports")
+def get_team_reports(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return []
+    
+    reports = db.query(TeamReport).filter(TeamReport.company_id == user.company_id).all()
+    return reports
 
 @app.get("/api/sourcing")
 def get_ai_sourcing(category: str):
