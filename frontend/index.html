@@ -68,6 +68,16 @@
             </h2>
             <div id="compliance-content" class="grid md:grid-cols-2 gap-8"></div>
         </div>
+
+        <!-- TikTok Video Feed -->
+        <div id="tiktok-feed" class="mb-16">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span>🎥</span> TikTok 实时热门视频
+            </h2>
+            <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+                <!-- Videos will be injected here -->
+            </div>
+        </div>
     </main>
 
     <!-- AI Chat Floating Button -->
@@ -139,6 +149,25 @@
             }
         }
 
+        async function fetchTikTok() {
+            try {
+                const res = await fetch(`${API_BASE}/tiktok/trending`);
+                const data = await res.json();
+                const grid = document.getElementById('video-grid');
+                grid.innerHTML = data.videos.map(v => `
+                    <div class="card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.open('${v.video_url}')">
+                        <div class="aspect-[9/16] relative bg-cover bg-center" style="background-image: url('${v.cover_url}')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                                <div class="text-xs text-pink-400 font-bold mb-1">${v.author}</div>
+                                <div class="text-sm font-bold line-clamp-2">${v.title}</div>
+                                <div class="text-xs text-gray-400 mt-2">${v.play_count} views</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { console.error(e); }
+        }
+
         function toggleChat() {
             const box = document.getElementById('chat-box');
             box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
@@ -165,6 +194,7 @@
         }
 
         fetchMarket();
+        fetchTikTok();
         setInterval(fetchMarket, 60000);
     </script>
 </body>

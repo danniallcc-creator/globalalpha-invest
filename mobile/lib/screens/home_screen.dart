@@ -1,12 +1,23 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'compass_result_screen.dart';
 import 'compliance_detail_screen.dart';
 import 'profile_screen.dart';
 import 'chat_screen.dart';
 import '../services/api_service.dart';
+import '../services/localization_service.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
+  @override
+  _HomeScreenState createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  void _toggleLanguage() {
+    setState(() {
+      Localization.lang = Localization.lang == 'zh' ? 'en' : 'zh';
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -20,8 +31,12 @@ class HomeScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => ProfileScreen())),
         ),
-        title: Text('CROSS-BORDER'),
+        title: Text(Localization.t('app_title')),
         actions: [
+          TextButton(
+            child: Text(Localization.lang == 'zh' ? 'EN' : '中文', style: TextStyle(color: Colors.blueAccent)),
+            onPressed: _toggleLanguage,
+          ),
           IconButton(
             icon: Icon(Icons.auto_awesome, color: Colors.blueAccent),
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (c) => ChatScreen())),
@@ -43,11 +58,79 @@ class HomeScreen extends StatelessWidget {
               _buildMarketTickerSection(),
               _buildHeroSection(),
               _buildFeatureGrid(context),
+              _buildTikTokPreviewSection(),
               _buildRecentTrendsSection(),
             ],
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildTikTokPreviewSection() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text('TikTok 爆火趋势', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+              Icon(Icons.play_circle_fill, color: Colors.pinkAccent),
+            ],
+          ),
+        ),
+        Container(
+          height: 220,
+          child: FutureBuilder<List<dynamic>>(
+            future: ApiService.fetchTikTokVideos("outdoor power station"),
+            builder: (context, snapshot) {
+              if (!snapshot.hasData) return Center(child: CircularProgressIndicator());
+              final videos = snapshot.data!;
+              return ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.symmetric(horizontal: 16),
+                itemCount: videos.length,
+                itemBuilder: (context, index) {
+                  final video = videos[index];
+                  return Container(
+                    width: 140,
+                    margin: EdgeInsets.symmetric(horizontal: 8),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(16),
+                      image: DecorationImage(
+                        image: NetworkImage(video['cover_url']),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                        gradient: LinearGradient(
+                          begin: Alignment.topCenter,
+                          end: Alignment.bottomCenter,
+                          colors: [Colors.transparent, Colors.black87],
+                        ),
+                      ),
+                      padding: EdgeInsets.all(12),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(video['play_count'] + ' views', style: TextStyle(fontSize: 10, color: Colors.white70)),
+                          SizedBox(height: 4),
+                          Text(video['title'], maxLines: 2, overflow: TextOverflow.ellipsis, style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold)),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 

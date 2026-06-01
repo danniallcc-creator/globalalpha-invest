@@ -28,4 +28,10 @@ class ApiService {
     final data = jsonDecode(response.body);
     return data['reply'];
   }
+
+  static Future<List<dynamic>> fetchTikTokVideos(String category) async {
+    final response = await http.get(Uri.parse('$baseUrl/tiktok/trending?category=$category'));
+    final data = jsonDecode(response.body);
+    return data['videos'];
+  }
 }

@@ -8,6 +8,7 @@ import os
 from backend.app.services.trends_service import TrendsService
 from backend.app.services.market_service import MarketService
 from backend.app.services.report_service import ReportService
+from backend.app.services.tiktok_service import TikTokService
 from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog
 
 app = FastAPI(title="Cross-border Export Intelligence API")
@@ -97,22 +98,33 @@ class FavoriteRequest(BaseModel):
 class ChatRequest(BaseModel):
     message: str
     username: Optional[str] = "guest"
+    lang: Optional[str] = "zh"
 
 @app.post("/api/ai-chat")
 def ai_chat(req: ChatRequest):
     # Simple RAG Simulation: Search local DB for context
     query = req.message.lower()
+    lang = req.lang
     context = ""
     for item in COMPLIANCE_DATA:
         if any(word in item["category"].lower() for word in query.split()) or \
            any(word in query for word in item["category"].lower().split()):
-            context = f"关于{item['category']}的合规建议是：{item['suggestion']}。具体策略：{item['breakthrough']}。"
+            if lang == "en":
+                context = f"Advice for {item['category']}: {item['suggestion']}. Strategy: {item['breakthrough']}."
+            else:
+                context = f"关于{item['category']}的合规建议是：{item['suggestion']}。具体策略：{item['breakthrough']}。"
             break
     
     if context:
-        response = f"您好！针对您问的‘{req.message}’，我为您检索到了以下专业建议：\n\n{context}\n\n如果您还需要深入的国别报告，可以点击‘生成报告’按钮。"
+        if lang == "en":
+            response = f"Hello! Regarding '{req.message}', I found the following professional advice:\n\n{context}\n\nFor a deeper report, click 'Generate Report'."
+        else:
+            response = f"您好！针对您问的‘{req.message}’，我为您检索到了以下专业建议：\n\n{context}\n\n如果您还需要深入的国别报告，可以点击‘生成报告’按钮。"
     else:
-        response = f"收到您的咨询：‘{req.message}’。目前我主要掌握建材、电子、母婴、服装和新能源市场的合规情报。如果是这几个领域，您可以问得更具体些，例如‘母婴产品出口德国’。"
+        if lang == "en":
+            response = f"Received your query: '{req.message}'. I currently cover Electronics, Maternal, Clothing, and Energy. Please be more specific."
+        else:
+            response = f"收到您的咨询：‘{req.message}’。目前我主要掌握建材、电子、母婴、服装和新能源市场的合规情报。如果是这几个领域，您可以问得更具体些。"
     
     return {"status": "success", "reply": response}
 
@@ -184,6 +196,11 @@ def get_ai_sourcing(category: str):
         "TikTok": tk,
         "AI_Suggestion": insight
     }
+
+@app.get("/api/tiktok/trending")
+def get_tiktok_videos(category: str = "portable power station"):
+    videos = TikTokService.get_trending_videos(category)
+    return {"status": "success", "videos": videos}
 
 if __name__ == "__main__":
     import uvicorn
