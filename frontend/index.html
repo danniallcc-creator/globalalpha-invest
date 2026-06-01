@@ -114,26 +114,210 @@
 
     <script>
         const API_BASE = "http://localhost:8000/api";
+        let isOffline = false;
+
+        async function apiFetch(url, options = {}) {
+            const controller = new AbortController();
+            const id = setTimeout(() => controller.abort(), 1500); // 1.5s timeout for local backend
+            try {
+                const response = await fetch(url, { ...options, signal: controller.signal });
+                clearTimeout(id);
+                return response;
+            } catch (e) {
+                isOffline = true;
+                throw e;
+            }
+        }
 
         async function fetchMarket() {
             try {
-                const res = await fetch(`${API_BASE}/market`);
-                if (!res.ok) throw new Error();
+                const res = await apiFetch(`${API_BASE}/market`);
                 const data = await res.json();
                 document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change || '+0.5%'})`;
                 document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `<span>${f.pair}: ${f.rate.toFixed(2)}</span>`).join(' | ');
                 document.getElementById('last-update').innerText = `更新时间: ${new Date(data.last_update).toLocaleString()}`;
                 
-                // Update status to online
                 const status = document.getElementById('backend-status');
                 status.innerHTML = '<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接';
                 status.className = "bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[10px] flex items-center gap-1";
             } catch (e) { 
-                console.warn("Backend not reachable. Using Demo Data.");
                 document.getElementById('gold-price').innerText = `伦敦金: $2,345.67 (演示数据)`;
                 document.getElementById('fx-rates').innerHTML = `USD/CNY: 7.24 | EUR/CNY: 7.85 | JPY/CNY: 0.046`;
                 document.getElementById('last-update').innerText = `模式: 离线演示`;
             }
+        }
+
+        async function runCompass() {
+            const cat = document.getElementById('search-input').value;
+            if (!cat) return;
+            
+            // Immediately show results container and scroll
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.classList.remove('hidden');
+            window.scrollTo({ top: resultsDiv.offsetTop - 100, behavior: 'smooth' });
+
+            try {
+                const res = await apiFetch(`${API_BASE}/compass?category=${cat}`);
+                const data = await res.json();
+                
+                const renderList = (id, list) => {
+                    document.getElementById(id).innerHTML = list.map(c => `
+                        <div class="card p-4 rounded-xl">
+                            <div class="font-bold text-lg">${c.name}</div>
+                            <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
+                        </div>
+                    `).join('');
+                };
+                renderList('profit-list', data.recommendations.profit_market);
+                renderList('mass-list', data.recommendations.mass_market);
+                renderList('blue-list', data.recommendations.blue_ocean);
+
+                const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
+                const cData = await cRes.json();
+                if (cData.length > 0) {
+                    document.getElementById('compliance-section').classList.remove('hidden');
+                    const item = cData[0];
+                    document.getElementById('compliance-content').innerHTML = `
+                        <div class="border-r border-white/10 pr-8">
+                            <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
+                            <p class="text-gray-300 text-sm">${item.reason}</p>
+                        </div>
+                        <div>
+                            <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
+                            <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
+                        </div>
+                    `;
+                }
+            } catch (e) {
+                // Mock Full Results for demo
+                const demoData = [
+                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
+                    {name: "澳大利亚 (演示)", gdp: "65.0k", growth: "2.5"},
+                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
+                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
+                ];
+                document.getElementById('profit-list').innerHTML = `
+                    <div class="card p-4 rounded-xl mb-3"><div class="font-bold">${demoData[0].name}</div><p class="text-xs text-gray-400">高客单价核心市场</p></div>
+                    <div class="card p-4 rounded-xl"><div class="font-bold">${demoData[1].name}</div><p class="text-xs text-gray-400">能源补贴高增长区</p></div>`;
+                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[2].name}</div><p class="text-xs text-gray-400">成熟基建大规模市场</p></div>`;
+                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[3].name}</div><p class="text-xs text-gray-400">人口年轻高速增长区</p></div>`;
+                
+                document.getElementById('compliance-section').classList.remove('hidden');
+                document.getElementById('compliance-content').innerHTML = `
+                    <div class="border-r border-white/10 pr-8">
+                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (离线演示)</h3>
+                        <p class="text-gray-300 text-sm">该品类在欧美通常需要 CE/UL 认证，且需满足当地最新的 EPR 包装法要求。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (离线演示)</h3>
+                        <p class="text-gray-300 text-sm italic">建议针对当地能源政策开发“一键并网”套件，提高产品的技术壁垒和溢价空间。</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value;
+            if (!msg) return;
+            
+            const msgs = document.getElementById('chat-messages');
+            msgs.innerHTML += `<div class="bg-blue-600/20 p-3 rounded-lg text-right ml-8">${msg}</div>`;
+            input.value = "";
+            msgs.scrollTop = msgs.scrollHeight;
+
+            try {
+                const res = await apiFetch(`${API_BASE}/ai-chat`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+                const data = await res.json();
+                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
+            } catch (e) {
+                const demoReply = `针对您的咨询“${msg}”，在离线演示模式下，我可以为您提供一般性建议：\n\n1. **市场选择**：优先考虑人均GDP高且有相关补贴政策的国家（如德、澳）。\n2. **合规准入**：确保具备目标市场的核心认证（如CE/FCC）。\n3. **选品建议**：关注TikTok上近期搜索增速超过100%的热门标签。\n\n*请连接后端以获取基于真实智库数据的深度回复。*`;
+                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${demoReply.replace(/\n/g, '<br>')}</div>`;
+            }
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        async function fetchTikTok() {
+            try {
+                const res = await apiFetch(`${API_BASE}/tiktok/trending`);
+                const data = await res.json();
+                const grid = document.getElementById('video-grid');
+                grid.innerHTML = data.videos.map(v => `
+                    <div class="card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.open('${v.video_url}')">
+                        <div class="aspect-[9/16] relative bg-cover bg-center" style="background-image: url('${v.cover_url}')">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
+                                <div class="text-xs text-pink-400 font-bold mb-1">${v.author}</div>
+                                <div class="text-sm font-bold line-clamp-2">${v.title}</div>
+                                <div class="text-xs text-gray-400 mt-2">${v.play_count} views</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { 
+                const grid = document.getElementById('video-grid');
+                grid.innerHTML = `
+                    <div class="card p-8 rounded-2xl text-center text-gray-500 col-span-full border-dashed border-2 border-white/10">
+                        【演示模式】启动后端后即可展示 TikTok 实时热门视频流
+                    </div>
+                `;
+            }
+        }
+
+        async function fetchEcom() {
+            try {
+                const res = await apiFetch(`${API_BASE}/ecom/trending`);
+                const data = await res.json();
+                const grid = document.getElementById('ecom-grid');
+                grid.innerHTML = Object.entries(data.platforms).map(([region, items]) => `
+                    <div class="card p-6 rounded-2xl">
+                        <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
+                            <span>📍</span> ${region}
+                        </h3>
+                        <div class="space-y-4">
+                            ${items.map(item => `
+                                <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
+                                    <span class="text-2xl">${item.icon}</span>
+                                    <div>
+                                        <div class="text-sm font-bold">${item.product}</div>
+                                        <div class="text-xs text-gray-400">${item.platform} • 增长 ${item.growth}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `).join('');
+            } catch (e) { 
+                const grid = document.getElementById('ecom-grid');
+                const demoItems = [
+                    {region: "东南亚 (Shopee)", product: "无线耳机", growth: "42%", icon: "🎧"},
+                    {region: "拉美 (Mercado Libre)", product: "太阳能灯", growth: "55%", icon: "💡"},
+                    {region: "欧洲 (OTTO)", product: "智能家居", growth: "62%", icon: "🏠"}
+                ];
+                grid.innerHTML = demoItems.map(item => `
+                    <div class="card p-6 rounded-2xl">
+                        <h3 class="text-blue-400 font-bold mb-4">📍 ${item.region}</h3>
+                        <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <div class="text-sm font-bold">${item.product}</div>
+                                <div class="text-xs text-gray-400">Demo • 增长 ${item.growth}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
+        fetchMarket();
+        fetchTikTok();
+        fetchEcom();
+        setInterval(fetchMarket, 60000);
+    </script>
+
         }
 
         async function runCompass() {
