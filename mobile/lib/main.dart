@@ -14,7 +14,18 @@ class CrossBorderApp extends StatelessWidget {
         brightness: Brightness.dark,
         primaryColor: Color(0xFF1A2B3C),
         accentColor: Colors.blueAccent,
-        scaffoldBackgroundColor: Color(0xFF0D1B2A),
+        scaffoldBackgroundColor: Color(0xFF020B18), // Deeper dark blue
+        cardTheme: CardTheme(
+          color: Colors.white.withOpacity(0.05),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          elevation: 0,
+        ),
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          centerTitle: true,
+          titleTextStyle: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
       home: HomeScreen(),
     );
