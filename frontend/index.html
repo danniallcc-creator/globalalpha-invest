@@ -8,18 +8,17 @@
     <style>
         .gradient-bg { background: linear-gradient(135deg, #1A2B3C 0%, #2C3E50 100%); }
         .card { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+        .chat-window { display: none; }
     </style>
 </head>
 <body class="gradient-bg text-white min-h-screen font-sans">
     <!-- Ticker Bar -->
-    <div class="bg-black/40 py-2 px-6 flex justify-between items-center text-sm border-b border-white/10">
+    <div id="ticker" class="bg-black/40 py-2 px-6 flex justify-between items-center text-sm border-b border-white/10">
         <div class="flex gap-4">
-            <span class="text-yellow-400">伦敦金: $2,345.67 (+0.5%)</span>
-            <span>USD/CNY: 7.24</span>
-            <span>EUR/CNY: 7.85</span>
-            <span>GBP/CNY: 9.21</span>
+            <span id="gold-price" class="text-yellow-400">加载中...</span>
+            <span id="fx-rates"></span>
         </div>
-        <div class="text-gray-400">数据最后更新: 2026-06-01 10:00</div>
+        <div id="last-update" class="text-gray-400 text-xs"></div>
     </div>
 
     <main class="max-w-6xl mx-auto p-8">
@@ -30,81 +29,143 @@
 
         <!-- Search Section -->
         <div class="max-w-2xl mx-auto mb-16 relative">
-            <input type="text" placeholder="输入产品类目（如：户外储能）" class="w-full bg-white/10 border border-white/20 rounded-full py-4 px-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
-            <button class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 py-2 transition-all">开启罗盘</button>
+            <input id="search-input" type="text" placeholder="输入产品类目（如：户外储能）" class="w-full bg-white/10 border border-white/20 rounded-full py-4 px-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+            <button onclick="runCompass()" class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 py-2 transition-all">开启罗盘</button>
         </div>
 
         <!-- Result Matrix -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+        <div id="results" class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16 hidden">
             <!-- Profit Market -->
             <div class="card p-6 rounded-2xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-green-500/20 p-2 rounded-lg text-green-400">💎</div>
                     <h2 class="text-xl font-semibold">首选利润国</h2>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="font-bold">德国 / 澳大利亚</div>
-                        <p class="text-sm text-gray-400 mt-2">高支付能力、高能效需求、政策补贴支持。</p>
-                    </div>
-                </div>
+                <div id="profit-list" class="space-y-4"></div>
             </div>
-
             <!-- Mass Market -->
             <div class="card p-6 rounded-2xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400">🌊</div>
                     <h2 class="text-xl font-semibold">首选规模国</h2>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="font-bold">美国</div>
-                        <p class="text-sm text-gray-400 mt-2">海量市场基数、成熟电商物流、强力消费文化。</p>
-                    </div>
-                </div>
+                <div id="mass-list" class="space-y-4"></div>
             </div>
-
             <!-- Blue Ocean -->
             <div class="card p-6 rounded-2xl">
                 <div class="flex items-center gap-3 mb-4">
                     <div class="bg-purple-500/20 p-2 rounded-lg text-purple-400">🚀</div>
                     <h2 class="text-xl font-semibold">首选蓝海国</h2>
                 </div>
-                <div class="space-y-4">
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="font-bold">巴西 / 印度尼西亚</div>
-                        <p class="text-sm text-gray-400 mt-2">人口红利显著、基建升级期、中方贸易高增速。</p>
-                    </div>
-                </div>
+                <div id="blue-list" class="space-y-4"></div>
             </div>
         </div>
 
-        <!-- Compliance Check -->
-        <div class="card p-8 rounded-2xl mb-16">
+        <!-- Compliance Section -->
+        <div id="compliance-section" class="card p-8 rounded-2xl mb-16 hidden">
             <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
                 <span>🛡️</span> 行业合规转型建议
             </h2>
-            <div class="grid md:grid-cols-2 gap-8">
-                <div class="border-r border-white/10 pr-8">
-                    <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
-                    <ul class="list-disc list-inside text-gray-300 space-y-2">
-                        <li>德国：必须获得 CE-EMC/LVD 认证</li>
-                        <li>美国：需通过 UL 1973 储能电池认证</li>
-                        <li>澳洲：需满足 AS/NZS 4777.2 并网要求</li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
-                    <p class="text-gray-300 leading-relaxed">
-                        不要只卖单机，针对欧美市场应开发“即插即用”家庭能源管理套件，并适配当地电价波谷充电逻辑。
-                    </p>
-                </div>
-            </div>
+            <div id="compliance-content" class="grid md:grid-cols-2 gap-8"></div>
         </div>
     </main>
 
-    <footer class="text-center py-8 text-gray-500 text-sm border-t border-white/10 mt-12">
-        &copy; 2026 跨境出海智库 - 全球视野 决策有道
-    </footer>
+    <!-- AI Chat Floating Button -->
+    <div class="fixed bottom-8 right-8 z-50">
+        <button onclick="toggleChat()" class="bg-blue-600 w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl hover:scale-110 transition-transform">💬</button>
+        <div id="chat-box" class="chat-window absolute bottom-20 right-0 w-80 bg-gray-900 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[450px]">
+            <div class="bg-blue-600 p-4 font-bold flex justify-between">
+                <span>AI 智库助手</span>
+                <button onclick="toggleChat()">×</button>
+            </div>
+            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm scrollbar-hide">
+                <div class="bg-white/10 p-3 rounded-lg">您好！我是您的出海助手。您可以问我任何关于行业合规或选品趋势的问题。</div>
+            </div>
+            <div class="p-4 bg-black/20 flex gap-2">
+                <input id="chat-input" type="text" placeholder="输入问题..." class="flex-1 bg-white/10 rounded-lg px-3 py-2 outline-none">
+                <button onclick="sendMessage()" class="bg-blue-600 px-4 py-2 rounded-lg">发送</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = "http://localhost:8000/api";
+
+        async function fetchMarket() {
+            try {
+                const res = await fetch(`${API_BASE}/market`);
+                const data = await res.json();
+                document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change || '+0.5%'})`;
+                document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `<span>${f.pair}: ${f.rate.toFixed(2)}</span>`).join(' | ');
+                document.getElementById('last-update').innerText = `更新时间: ${new Date(data.last_update).toLocaleString()}`;
+            } catch (e) { console.error(e); }
+        }
+
+        async function runCompass() {
+            const cat = document.getElementById('search-input').value;
+            if (!cat) return;
+            const res = await fetch(`${API_BASE}/compass?category=${cat}`);
+            const data = await res.json();
+            
+            document.getElementById('results').classList.remove('hidden');
+            const renderList = (id, list) => {
+                document.getElementById(id).innerHTML = list.map(c => `
+                    <div class="bg-white/5 p-4 rounded-xl">
+                        <div class="font-bold text-lg">${c.name}</div>
+                        <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
+                    </div>
+                `).join('');
+            };
+            renderList('profit-list', data.recommendations.profit_market);
+            renderList('mass-list', data.recommendations.mass_market);
+            renderList('blue-list', data.recommendations.blue_ocean);
+
+            // Fetch Compliance
+            const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
+            const cData = await cRes.json();
+            if (cData.length > 0) {
+                document.getElementById('compliance-section').classList.remove('hidden');
+                const item = cData[0];
+                document.getElementById('compliance-content').innerHTML = `
+                    <div class="border-r border-white/10 pr-8">
+                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
+                        <p class="text-gray-300 text-sm">${item.reason}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
+                        <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
+                    </div>
+                `;
+            }
+        }
+
+        function toggleChat() {
+            const box = document.getElementById('chat-box');
+            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const msg = input.value;
+            if (!msg) return;
+            
+            const msgs = document.getElementById('chat-messages');
+            msgs.innerHTML += `<div class="bg-blue-600/20 p-3 rounded-lg text-right ml-8">${msg}</div>`;
+            input.value = "";
+            msgs.scrollTop = msgs.scrollHeight;
+
+            const res = await fetch(`${API_BASE}/ai-chat`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({message: msg})
+            });
+            const data = await res.json();
+            msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
+            msgs.scrollTop = msgs.scrollHeight;
+        }
+
+        fetchMarket();
+        setInterval(fetchMarket, 60000);
+    </script>
 </body>
 </html>

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'compass_result_screen.dart';
 import 'compliance_detail_screen.dart';
 import 'profile_screen.dart';
+import 'chat_screen.dart';
+import '../services/api_service.dart';
 
 class HomeScreen extends StatelessWidget {
   @override
@@ -14,13 +16,25 @@ class HomeScreen extends StatelessWidget {
           Navigator.push(context, MaterialPageRoute(builder: (c) => ProfileScreen()));
         }),
         actions: [
-          IconButton(icon: Icon(Icons.notifications_none), onPressed: () {}),
+          IconButton(icon: Icon(Icons.auto_awesome), onPressed: () {
+            Navigator.push(context, MaterialPageRoute(builder: (c) => ChatScreen()));
+          }),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildMarketTicker(),
+            FutureBuilder<Map<String, dynamic>>(
+              future: ApiService.fetchMarketData(),
+              builder: (context, snapshot) {
+                if (!snapshot.hasData) return _buildMarketTicker(gold: "加载中...", usd: "...");
+                final data = snapshot.data!;
+                return _buildMarketTicker(
+                  gold: "伦敦金: \$${data['gold']['price']}",
+                  usd: "USD/CNY: ${data['forex'][0]['rate'].toStringAsFixed(2)}"
+                );
+              },
+            ),
             _buildSearchBar(),
             _buildFeatureGrid(context),
             _buildHotTrends(),
@@ -30,15 +44,15 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildMarketTicker() {
+  Widget _buildMarketTicker({required String gold, required String usd}) {
     return Container(
       padding: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       color: Colors.black26,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text('伦敦金: $2,345.67 (+0.5%)', style: TextStyle(color: Colors.amber, fontSize: 12)),
-          Text('USD/CNY: 7.24', style: TextStyle(color: Colors.white70, fontSize: 12)),
+          Text(gold, style: TextStyle(color: Colors.amber, fontSize: 12)),
+          Text(usd, style: TextStyle(color: Colors.white70, fontSize: 12)),
         ],
       ),
     );
@@ -75,7 +89,10 @@ class HomeScreen extends StatelessWidget {
           onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => ComplianceDetailScreen())),
           child: _featureCard('合规查询', Icons.gavel, Colors.orange),
         ),
-        _featureCard('AI 选品', Icons.auto_awesome, Colors.purple),
+        GestureDetector(
+          onTap: () => Navigator.push(context, MaterialPageRoute(builder: (c) => ChatScreen())),
+          child: _featureCard('AI 选品', Icons.auto_awesome, Colors.purple),
+        ),
       ],
     );
   }
