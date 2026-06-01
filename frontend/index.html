@@ -73,6 +73,22 @@
             <div id="compliance-content" class="grid md:grid-cols-2 gap-8"></div>
         </div>
 
+        <!-- Competitor Pricing Section -->
+        <div id="pricing-section" class="mb-16 hidden">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span>💰</span> 竞品价格监测 (Global Pricing)
+            </h2>
+            <div id="pricing-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"></div>
+        </div>
+
+        <!-- Customs & Logistics Section -->
+        <div id="customs-section" class="mb-16 hidden">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span>🚢</span> 海关数据与物流看板
+            </h2>
+            <div id="customs-content" class="card p-8 rounded-2xl grid md:grid-cols-3 gap-8"></div>
+        </div>
+
         <!-- Download Full Report Button -->
         <div id="download-section" class="text-center mb-16 hidden">
             <button id="dl-btn" onclick="downloadReport()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-full shadow-xl transition-all hover:scale-105">
@@ -174,7 +190,7 @@
             window.scrollTo({ top: resultsDiv.offsetTop - 100, behavior: 'smooth' });
 
             try {
-                const res = await apiFetch(`${API_BASE}/compass?category=${cat}`);
+                const res = await apiFetch(`${API_BASE}/intel?category=${cat}`);
                 const data = await res.json();
                 
                 const renderList = (id, list) => {
@@ -189,11 +205,9 @@
                 renderList('mass-list', data.recommendations.mass_market);
                 renderList('blue-list', data.recommendations.blue_ocean);
 
-                const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
-                const cData = await cRes.json();
-                if (cData.length > 0) {
+                if (data.compliance_info.length > 0) {
                     document.getElementById('compliance-section').classList.remove('hidden');
-                    const item = cData[0];
+                    const item = data.compliance_info[0];
                     document.getElementById('compliance-content').innerHTML = `
                         <div class="border-r border-white/10 pr-8">
                             <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
@@ -205,6 +219,128 @@
                         </div>
                     `;
                 }
+
+                // Render Pricing
+                document.getElementById('pricing-section').classList.remove('hidden');
+                document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
+                    <div class="card p-5 rounded-2xl">
+                        <div class="text-xs text-blue-400 font-bold mb-2 uppercase">${region}</div>
+                        <div class="flex justify-between items-baseline mb-4">
+                            <span class="text-2xl font-bold">${info.currency} ${info.mid_range}</span>
+                            <span class="text-xs text-green-400">Mid-range</span>
+                        </div>
+                        <div class="space-y-2 text-xs text-gray-400">
+                            <div class="flex justify-between"><span>入门级:</span><span>${info.currency} ${info.entry_level}</span></div>
+                            <div class="flex justify-between"><span>旗舰级:</span><span>${info.currency} ${info.premium}</span></div>
+                            <div class="pt-2 border-t border-white/5">主要竞品: ${info.top_competitors[0]}...</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Render Customs
+                document.getElementById('customs-section').classList.remove('hidden');
+                const c = data.customs_stats;
+                document.getElementById('customs-content').innerHTML = `
+                    <div>
+                        <h3 class="text-gray-400 text-sm mb-1">HS Code (类目)</h3>
+                        <div class="text-2xl font-bold">${c.hs_code}</div>
+                        <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
+                    </div>
+                    <div class="border-x border-white/10 px-8">
+                        <h3 class="text-gray-400 text-sm mb-1">主要出口枢纽/港口</h3>
+                        <div class="space-y-1">
+                            ${c.top_export_hubs.map(h => `<div class="text-sm">📍 ${h}</div>`).join('')}
+                            <div class="text-xs text-blue-400 mt-2">目的港: ${c.main_destination_ports[0]}...</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm mb-1">物流时效 (平均)</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm"><span>美西海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to US West)']}天</span></div>
+                            <div class="flex justify-between text-sm"><span>欧洲海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to Europe)']}天</span></div>
+                            <div class="flex justify-between text-sm"><span>全球空运</span><span class="text-blue-400">${c.average_shipping_days['Air (Mainland to Global)']}天</span></div>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                // Mock Full Results for demo
+                const demoData = [
+                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
+                    {name: "澳大利亚 (演示)", gdp: "65.0k", growth: "2.5"},
+                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
+                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
+                ];
+                document.getElementById('profit-list').innerHTML = `
+                    <div class="card p-4 rounded-xl mb-3"><div class="font-bold">${demoData[0].name}</div><p class="text-xs text-gray-400">高客单价核心市场</p></div>
+                    <div class="card p-4 rounded-xl"><div class="font-bold">${demoData[1].name}</div><p class="text-xs text-gray-400">能源补贴高增长区</p></div>`;
+                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[2].name}</div><p class="text-xs text-gray-400">成熟基建大规模市场</p></div>`;
+                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[3].name}</div><p class="text-xs text-gray-400">人口年轻高速增长区</p></div>`;
+                
+                document.getElementById('compliance-section').classList.remove('hidden');
+                document.getElementById('compliance-content').innerHTML = `
+                    <div class="border-r border-white/10 pr-8">
+                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (离线演示)</h3>
+                        <p class="text-gray-300 text-sm">该品类在欧美通常需要 CE/UL 认证，且需满足当地最新的 EPR 包装法要求。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (离线演示)</h3>
+                        <p class="text-gray-300 text-sm italic">建议针对当地能源政策开发“一键并网”套件，提高产品的技术壁垒 and 溢价空间。</p>
+                    </div>
+                `;
+
+                document.getElementById('pricing-section').classList.remove('hidden');
+                document.getElementById('pricing-grid').innerHTML = `
+                    <div class="card p-5 rounded-2xl opacity-60">
+                        <div class="text-xs text-blue-400 font-bold mb-2 uppercase">北美 (演示)</div>
+                        <div class="text-2xl font-bold">$ 129.00</div>
+                        <div class="text-xs text-gray-400 mt-2">启动后端查看真实行情</div>
+                    </div>
+                `.repeat(4);
+            }
+
+                // Render Pricing
+                document.getElementById('pricing-section').classList.remove('hidden');
+                document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
+                    <div class="card p-5 rounded-2xl">
+                        <div class="text-xs text-blue-400 font-bold mb-2 uppercase">${region}</div>
+                        <div class="flex justify-between items-baseline mb-4">
+                            <span class="text-2xl font-bold">${info.currency} ${info.mid_range}</span>
+                            <span class="text-xs text-green-400">Mid-range</span>
+                        </div>
+                        <div class="space-y-2 text-xs text-gray-400">
+                            <div class="flex justify-between"><span>入门级:</span><span>${info.currency} ${info.entry_level}</span></div>
+                            <div class="flex justify-between"><span>旗舰级:</span><span>${info.currency} ${info.premium}</span></div>
+                            <div class="pt-2 border-t border-white/5">主要竞品: ${info.top_competitors[0]}...</div>
+                        </div>
+                    </div>
+                `).join('');
+
+                // Render Customs
+                document.getElementById('customs-section').classList.remove('hidden');
+                const c = data.customs_stats;
+                document.getElementById('customs-content').innerHTML = `
+                    <div>
+                        <h3 class="text-gray-400 text-sm mb-1">HS Code (类目)</h3>
+                        <div class="text-2xl font-bold">${c.hs_code}</div>
+                        <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
+                    </div>
+                    <div class="border-x border-white/10 px-8">
+                        <h3 class="text-gray-400 text-sm mb-1">主要出口枢纽/港口</h3>
+                        <div class="space-y-1">
+                            ${c.top_export_hubs.map(h => `<div class="text-sm">📍 ${h}</div>`).join('')}
+                            <div class="text-xs text-blue-400 mt-2">目的港: ${c.main_destination_ports[0]}...</div>
+                        </div>
+                    </div>
+                    <div>
+                        <h3 class="text-gray-400 text-sm mb-1">物流时效 (平均)</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between text-sm"><span>美西海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to US West)']}天</span></div>
+                            <div class="flex justify-between text-sm"><span>欧洲海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to Europe)']}天</span></div>
+                            <div class="flex justify-between text-sm"><span>全球空运</span><span class="text-blue-400">${c.average_shipping_days['Air (Mainland to Global)']}天</span></div>
+                        </div>
+                    </div>
+                `;
+
             } catch (e) {
                 // Mock Full Results for demo
                 const demoData = [

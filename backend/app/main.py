@@ -10,6 +10,8 @@ from backend.app.services.market_service import MarketService
 from backend.app.services.report_service import ReportService
 from backend.app.services.tiktok_service import TikTokService
 from backend.app.services.local_ecom_service import LocalEcomService
+from backend.app.services.competitor_service import CompetitorService
+from backend.app.services.customs_service import CustomsService
 from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog
 
 app = FastAPI(title="Cross-border Export Intelligence API")
@@ -168,6 +170,40 @@ def get_favorites(username: str, db: Session = Depends(get_db)):
         return []
     return [f.item for f in user.favorites]
 
+@app.get("/api/intel")
+def get_full_intel(category: str):
+    """Aggregate all intelligence data for the UI and Report."""
+    compass_data = get_compass(category)
+    ai_insight = TrendsService.get_ai_insight(category)
+    ecom_trends = LocalEcomService.get_all_platforms()
+    tiktok_trends = TikTokService.get_trending_videos(category)
+    pricing_analysis = CompetitorService.get_pricing_analysis(category)
+    customs_stats = CustomsService.get_customs_stats(category)
+    
+    compliance_info = [
+        item for item in COMPLIANCE_DATA 
+        if any(word in item["category"].lower() for word in category.lower().split())
+    ]
+    
+    market_details = {}
+    for group in compass_data["recommendations"].values():
+        for country in group:
+            market_details[country["name"]] = {
+                "gdp": f"{country['gdp_per_capita'] / 1000:.1f}k",
+                "population": country["pop"]
+            }
+            
+    return {
+        "recommendations": compass_data["recommendations"],
+        "ai_insight": ai_insight,
+        "ecom_trends": ecom_trends,
+        "tiktok_trends": tiktok_trends,
+        "compliance_info": compliance_info,
+        "market_details": market_details,
+        "pricing_analysis": pricing_analysis,
+        "customs_stats": customs_stats
+    }
+
 @app.get("/api/report/generate")
 def generate_report(category: str):
     # 1. Fetch data for the report
@@ -175,6 +211,8 @@ def generate_report(category: str):
     ai_insight = TrendsService.get_ai_insight(category)
     ecom_trends = LocalEcomService.get_all_platforms()
     tiktok_trends = TikTokService.get_trending_videos(category)
+    pricing_analysis = CompetitorService.get_pricing_analysis(category)
+    customs_stats = CustomsService.get_customs_stats(category)
     
     # 2. Get Compliance Data specific to this category
     compliance_info = [
@@ -197,7 +235,9 @@ def generate_report(category: str):
         "ecom_trends": ecom_trends,
         "tiktok_trends": tiktok_trends,
         "compliance_info": compliance_info,
-        "market_details": market_details
+        "market_details": market_details,
+        "pricing_analysis": pricing_analysis,
+        "customs_stats": customs_stats
     }
     
     filename = f"{category.replace(' ', '_')}_report.pdf"
