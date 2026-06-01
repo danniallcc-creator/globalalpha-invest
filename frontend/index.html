@@ -133,16 +133,25 @@
             try {
                 const res = await apiFetch(`${API_BASE}/market`);
                 const data = await res.json();
-                document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change || '+0.5%'})`;
-                document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `<span>${f.pair}: ${f.rate.toFixed(2)}</span>`).join(' | ');
-                document.getElementById('last-update').innerText = `更新时间: ${new Date(data.last_update).toLocaleString()}`;
+                const gold = data.gold;
+                document.getElementById('gold-price').innerHTML = `
+                    伦敦金: <span class="font-bold">$${gold.price}</span> 
+                    <span class="text-xs ${gold.change.startsWith('-') ? 'text-red-400' : 'text-green-400'}">
+                        (${gold.change})
+                    </span>
+                    <span class="text-[10px] text-gray-500 ml-1">昨收: $${gold.prev_close}</span>
+                `;
+                document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `
+                    <span class="mr-2">${f.pair}: <span class="font-bold">${f.rate.toFixed(4)}</span></span>
+                `).join(' | ');
+                document.getElementById('last-update').innerText = `数据源: ${data.source} | 更新: ${data.last_update}`;
                 
                 const status = document.getElementById('backend-status');
                 status.innerHTML = '<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接';
                 status.className = "bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[10px] flex items-center gap-1";
             } catch (e) { 
-                document.getElementById('gold-price').innerText = `伦敦金: $2,345.67 (演示数据)`;
-                document.getElementById('fx-rates').innerHTML = `USD/CNY: 7.24 | EUR/CNY: 7.85 | JPY/CNY: 0.046`;
+                document.getElementById('gold-price').innerText = `伦敦金: $4,522.57 (演示数据)`;
+                document.getElementById('fx-rates').innerHTML = `USD/CNY: 6.7657 | EUR/CNY: 7.8793 | JPY/CNY: 0.0424`;
                 document.getElementById('last-update').innerText = `模式: 离线演示`;
             }
         }

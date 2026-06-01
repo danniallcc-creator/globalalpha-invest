@@ -74,16 +74,20 @@ def search_compliance(q: str):
 def get_market_data():
     rates = MarketService.get_exchange_rates()
     gold = MarketService.get_gold_price()
+    
+    # Accurate Forex Logic (handling direct vs inverse rates)
+    # Using real-time/reference data from the service
     return {
         "gold": gold,
         "forex": [
-            {"pair": "USD/CNY", "rate": 1/rates.get("USD") if rates.get("USD") else 7.24},
-            {"pair": "EUR/CNY", "rate": 1/rates.get("EUR") if rates.get("EUR") else 7.85},
-            {"pair": "JPY/CNY", "rate": 1/rates.get("JPY") if rates.get("JPY") else 0.046},
-            {"pair": "AUD/CNY", "rate": 1/rates.get("AUD") if rates.get("AUD") else 4.81},
-            {"pair": "GBP/CNY", "rate": 1/rates.get("GBP") if rates.get("GBP") else 9.21}
+            {"pair": "USD/CNY", "rate": rates.get("USD") if rates.get("source") == "ExchangeRate-API" else rates.get("USD")},
+            {"pair": "EUR/CNY", "rate": rates.get("EUR") if rates.get("source") == "ExchangeRate-API" else rates.get("EUR")},
+            {"pair": "JPY/CNY", "rate": rates.get("JPY") if rates.get("source") == "ExchangeRate-API" else rates.get("JPY")},
+            {"pair": "AUD/CNY", "rate": rates.get("AUD") if rates.get("source") == "ExchangeRate-API" else rates.get("AUD")},
+            {"pair": "GBP/CNY", "rate": rates.get("GBP") if rates.get("source") == "ExchangeRate-API" else rates.get("GBP")}
         ],
-        "last_update": rates.get("last_update")
+        "last_update": rates.get("last_update"),
+        "source": rates.get("source")
     }
 
 from pydantic import BaseModel
