@@ -31,12 +31,17 @@
                 <div class="bg-blue-600 p-1.5 rounded-lg text-xl">🌍</div>
                 <h1 class="text-xl font-bold tracking-tight">Cross-border <span class="text-blue-500">Intel</span></h1>
             </div>
-            <div class="flex items-center gap-6 text-sm">
-                <div id="user-info" class="hidden flex items-center gap-4">
+        <div class="flex items-center gap-6 text-sm">
+            <div id="user-info" class="hidden flex items-center gap-4">
+                <div class="flex flex-col items-end">
                     <span id="nav-username" class="text-gray-300 font-medium"></span>
-                    <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors">退出</button>
+                    <span class="text-[10px] text-blue-400">智库点数: <span id="user-credits">0</span></span>
                 </div>
-                <div id="auth-links" class="flex gap-4">
+                <button onclick="buyCredits()" class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-md text-[10px] font-bold border border-blue-600/30 hover:bg-blue-600 hover:text-white transition-all">充值</button>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors">退出</button>
+            </div>
+            <div id="auth-links" class="flex gap-4">
+
                     <button onclick="showAuthModal('login')" class="text-gray-400 hover:text-white transition-colors">登录</button>
                     <button onclick="showAuthModal('register')" class="bg-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">注册团队</button>
                 </div>
@@ -163,12 +168,39 @@
                 document.getElementById('user-info').classList.remove('hidden');
                 document.getElementById('nav-username').innerText = username;
                 document.getElementById('team-workspace').classList.remove('hidden');
+                fetchUserProfile();
                 fetchTeamReports();
             } else {
                 document.getElementById('auth-links').classList.remove('hidden');
                 document.getElementById('user-info').classList.add('hidden');
                 document.getElementById('team-workspace').classList.add('hidden');
             }
+        }
+
+        async function fetchUserProfile() {
+            try {
+                const res = await apiFetch(`${API_BASE}/user/me`);
+                const data = await res.json();
+                document.getElementById('user-credits').innerText = data.credits;
+            } catch (e) { }
+        }
+
+        async function buyCredits() {
+            try {
+                const res = await apiFetch(`${API_BASE}/payment/create-session`, { method: 'POST' });
+                const data = await res.json();
+                if (data.url) {
+                    alert("跳转至支付页面 (模拟)...");
+                    window.open(data.url, '_blank');
+                    // In real app, Stripe handles this. For demo, we simulate success after 2s
+                    setTimeout(async () => {
+                        const sRes = await apiFetch(`${API_BASE}/payment/success?session_id=${data.id}`);
+                        const sData = await sRes.json();
+                        alert(sData.message);
+                        fetchUserProfile();
+                    }, 3000);
+                }
+            } catch (e) { alert("创建支付会话失败"); }
         }
 
         async function apiFetch(url, options = {}) {
@@ -321,13 +353,23 @@
         async function downloadReport() {
             const cat = document.getElementById('search-input').value;
             const btn = document.getElementById('dl-btn');
-            btn.innerText = "正在生成...";
+            const originalText = btn.innerText;
+            btn.innerText = "正在生成深度报告 (消耗 1 点数)...";
             try {
                 const res = await apiFetch(`${API_BASE}/report/generate?category=${cat}`);
+                if (res.status === 402) {
+                    alert("点数不足，请先充值");
+                    btn.innerText = originalText;
+                    return;
+                }
                 const data = await res.json();
                 window.open(data.download_url);
-                btn.innerText = "下载完整 PDF 调研报告";
-            } catch (e) { alert("下载失败"); btn.innerText = "下载完整 PDF 调研报告"; }
+                btn.innerText = originalText;
+                fetchUserProfile(); // Update credits display
+            } catch (e) { 
+                alert("下载失败，请重试"); 
+                btn.innerText = originalText; 
+            }
         }
 
         updateAuthUI();

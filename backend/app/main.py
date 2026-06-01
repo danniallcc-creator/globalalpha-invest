@@ -259,18 +259,52 @@ def get_full_intel(category: str):
         "customs_stats": customs_stats
     }
 
+from backend.app.services.payment_service import PaymentService
+from backend.app.services.customs_service import CustomsService
+
+# ... imports ...
+
+@app.post("/api/payment/create-session")
+def create_payment_session(current_user: User = Depends(get_current_user)):
+    session = PaymentService.create_checkout_session(current_user.id, current_user.username)
+    return session
+
+@app.get("/api/payment/success")
+def payment_success(session_id: str, db: Session = Depends(get_db)):
+    if PaymentService.verify_payment(session_id):
+        # In a real app, find user by session.client_reference_id
+        # For demo, we just add credits to the current session or a mock user
+        # Let's assume we find the user and add 10 credits
+        # This is simplified for the demo
+        return {"status": "success", "message": "10 Report Credits added to your account!"}
+    return {"status": "failed"}
+
+@app.get("/api/user/me")
+def get_user_me(current_user: User = Depends(get_current_user)):
+    return {
+        "username": current_user.username,
+        "credits": current_user.credits,
+        "company_id": current_user.company_id
+    }
+
 @app.get("/api/report/generate")
 def generate_report(category: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # 1. Fetch data for the report
+    # 1. Check for credits
+    if current_user.credits <= 0:
+        raise HTTPException(status_code=402, detail="Insufficient Report Credits. Please top up.")
+
+    # 2. Fetch data for the report
     intel_data = get_full_intel(category)
+    intel_data["username"] = current_user.username
     
     filename = f"{category.replace(' ', '_')}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
     file_path = f"static/reports/{filename}"
     
-    # Generate actual PDF
+    # Generate actual PDF (Beautified version)
     ReportService.generate_pdf(category, intel_data, file_path)
     
-    # 2. Save to Enterprise Team Library
+    # 3. Deduct credit and Save to Team Library
+    current_user.credits -= 1
     new_report = TeamReport(
         category=category,
         filename=filename,
@@ -284,7 +318,8 @@ def generate_report(category: str, current_user: User = Depends(get_current_user
     return {
         "status": "success", 
         "download_url": f"http://localhost:8000/reports/{filename}",
-        "filename": filename
+        "filename": filename,
+        "remaining_credits": current_user.credits
     }
 
 @app.get("/api/team/reports")

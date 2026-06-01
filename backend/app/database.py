@@ -20,6 +20,7 @@ class User(Base):
     hashed_password = Column(String)
     role = Column(String, default="analyst") # analyst, manager, admin
     company_id = Column(Integer, index=True) # For multi-tenant collaboration
+    credits = Column(Integer, default=3) # New: Users start with 3 free reports
     favorites = relationship("Favorite", back_populates="owner")
     team_reports = relationship("TeamReport", back_populates="creator")
 
