@@ -273,19 +273,27 @@
                         <div class="text-2xl font-bold">${c.hs_code}</div>
                         <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
                         <div class="mt-4 pt-4 border-t border-white/5">
-                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">主要市场关税 (Tariffs)</h4>
-                            <div class="space-y-1 text-[11px]">
-                                <div class="flex justify-between"><span>美国:</span><span class="text-red-400">${c.tariffs.USA}</span></div>
-                                <div class="flex justify-between"><span>欧盟:</span><span>${c.tariffs.EU}</span></div>
-                                <div class="flex justify-between"><span>RCEP:</span><span class="text-green-400">${c.tariffs['Southeast Asia (RCEP)']}</span></div>
+                            <h4 class="text-xs font-bold text-red-400 uppercase mb-2">风险预警 (Alerts)</h4>
+                            <div class="space-y-1 text-[10px] text-gray-300">
+                                ${c.risk_alerts.map(a => `<div>⚠️ ${a}</div>`).join('')}
                             </div>
                         </div>
                     </div>
                     <div class="border-x border-white/10 px-8">
-                        <h3 class="text-gray-400 text-sm mb-1">主要出口枢纽/港口</h3>
-                        <div class="space-y-1">
-                            ${c.top_export_hubs.map(h => `<div class="text-sm">📍 ${h}</div>`).join('')}
-                            <div class="text-xs text-blue-400 mt-2">目的港: ${c.main_destination_ports[0]}...</div>
+                        <h3 class="text-gray-400 text-sm mb-1">全球市场份额 (2025-26)</h3>
+                        <div class="space-y-2 mb-4">
+                            ${Object.entries(c.global_market_share).map(([country, share]) => `
+                                <div class="text-xs">
+                                    <div class="flex justify-between mb-1"><span>${country}</span><span>${share}</span></div>
+                                    <div class="w-full bg-white/5 h-1 rounded-full"><div class="bg-blue-500 h-1 rounded-full" style="width: ${share}"></div></div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">主要市场关税</h4>
+                        <div class="space-y-1 text-[11px]">
+                            <div class="flex justify-between"><span>美国:</span><span class="text-red-400">${c.tariffs.USA}</span></div>
+                            <div class="flex justify-between"><span>欧盟:</span><span>${c.tariffs.EU}</span></div>
+                            <div class="flex justify-between"><span>RCEP:</span><span class="text-green-400">${c.tariffs.RCEP}</span></div>
                         </div>
                     </div>
                     <div>

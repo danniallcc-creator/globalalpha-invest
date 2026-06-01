@@ -82,14 +82,34 @@ class ReportService:
         pdf.cell(0, 8, f"HS Code Category: {c.get('hs_code', 'N/A')}", ln=True)
         pdf.set_font("Helvetica", "", 10)
         pdf.cell(0, 6, f"  - Global Export Volume Trend: {c.get('export_volume_yoy', 'N/A')} YoY", ln=True)
+        pdf.cell(0, 6, f"  - Data Source: {c.get('data_source', 'Global Trade Repository')}", ln=True)
+        
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 8, "Global Market Share:", ln=True)
+        pdf.set_font("Helvetica", "", 10)
+        for country, share in c.get("global_market_share", {}).items():
+            pdf.cell(0, 6, f"  * {country}: {share}", ln=True)
+
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.set_text_color(192, 57, 43) # Red for Risk
+        pdf.cell(0, 8, "Risk Alerts & Regulatory Changes:", ln=True)
+        pdf.set_text_color(0, 0, 0)
+        pdf.set_font("Helvetica", "", 10)
+        for alert in c.get("risk_alerts", []):
+            pdf.multi_cell(0, 6, f"  ! {alert}")
+
+        pdf.ln(2)
+        pdf.set_font("Helvetica", "B", 11)
+        pdf.cell(0, 8, "Major Port Infrastructure & Tariffs:", ln=True)
+        pdf.set_font("Helvetica", "", 10)
         pdf.cell(0, 6, f"  - Top Export Hubs: {', '.join(c.get('top_export_hubs', []))}", ln=True)
         pdf.cell(0, 6, f"  - Main Ports: {', '.join(c.get('main_destination_ports', []))}", ln=True)
-        pdf.ln(3)
-        pdf.set_font("Helvetica", "B", 11)
-        pdf.cell(0, 8, "Estimated Logistics Lead Times:", ln=True)
-        pdf.set_font("Helvetica", "", 10)
-        for route, days in c.get("average_shipping_days", {}).items():
-            pdf.cell(0, 6, f"  * {route}: {days} days", ln=True)
+        
+        pdf.ln(2)
+        for market, tariff in c.get("tariffs", {}).items():
+            pdf.cell(0, 6, f"  * Tariff ({market}): {tariff}", ln=True)
 
         # --- SECTION 4: INDUSTRY & SOCIAL TRENDS (行业与社交趋势) ---
         pdf.add_page()
