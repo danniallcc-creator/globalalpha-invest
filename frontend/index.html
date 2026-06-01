@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>跨境出海智库 - 全球 80% 消费地图罗盘</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .gradient-bg { background: linear-gradient(135deg, #1A2B3C 0%, #2C3E50 100%); }
+        .card { backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="gradient-bg text-white min-h-screen font-sans">
+    <!-- Ticker Bar -->
+    <div class="bg-black/40 py-2 px-6 flex justify-between items-center text-sm border-b border-white/10">
+        <div class="flex gap-4">
+            <span class="text-yellow-400">伦敦金: $2,345.67 (+0.5%)</span>
+            <span>USD/CNY: 7.24</span>
+            <span>EUR/CNY: 7.85</span>
+            <span>GBP/CNY: 9.21</span>
+        </div>
+        <div class="text-gray-400">数据最后更新: 2026-06-01 10:00</div>
+    </div>
+
+    <main class="max-w-6xl mx-auto p-8">
+        <header class="text-center mb-12">
+            <h1 class="text-4xl font-bold mb-4">全球 80% 消费地图罗盘</h1>
+            <p class="text-gray-400">基于大数据算法，一键匹配全球利润、规模与蓝海市场</p>
+        </header>
+
+        <!-- Search Section -->
+        <div class="max-w-2xl mx-auto mb-16 relative">
+            <input type="text" placeholder="输入产品类目（如：户外储能）" class="w-full bg-white/10 border border-white/20 rounded-full py-4 px-8 focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg">
+            <button class="absolute right-2 top-2 bg-blue-600 hover:bg-blue-700 text-white rounded-full px-8 py-2 transition-all">开启罗盘</button>
+        </div>
+
+        <!-- Result Matrix -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
+            <!-- Profit Market -->
+            <div class="card p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-green-500/20 p-2 rounded-lg text-green-400">💎</div>
+                    <h2 class="text-xl font-semibold">首选利润国</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white/5 p-4 rounded-xl">
+                        <div class="font-bold">德国 / 澳大利亚</div>
+                        <p class="text-sm text-gray-400 mt-2">高支付能力、高能效需求、政策补贴支持。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Mass Market -->
+            <div class="card p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-blue-500/20 p-2 rounded-lg text-blue-400">🌊</div>
+                    <h2 class="text-xl font-semibold">首选规模国</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white/5 p-4 rounded-xl">
+                        <div class="font-bold">美国</div>
+                        <p class="text-sm text-gray-400 mt-2">海量市场基数、成熟电商物流、强力消费文化。</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blue Ocean -->
+            <div class="card p-6 rounded-2xl">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="bg-purple-500/20 p-2 rounded-lg text-purple-400">🚀</div>
+                    <h2 class="text-xl font-semibold">首选蓝海国</h2>
+                </div>
+                <div class="space-y-4">
+                    <div class="bg-white/5 p-4 rounded-xl">
+                        <div class="font-bold">巴西 / 印度尼西亚</div>
+                        <p class="text-sm text-gray-400 mt-2">人口红利显著、基建升级期、中方贸易高增速。</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Check -->
+        <div class="card p-8 rounded-2xl mb-16">
+            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
+                <span>🛡️</span> 行业合规转型建议
+            </h2>
+            <div class="grid md:grid-cols-2 gap-8">
+                <div class="border-r border-white/10 pr-8">
+                    <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
+                    <ul class="list-disc list-inside text-gray-300 space-y-2">
+                        <li>德国：必须获得 CE-EMC/LVD 认证</li>
+                        <li>美国：需通过 UL 1973 储能电池认证</li>
+                        <li>澳洲：需满足 AS/NZS 4777.2 并网要求</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
+                    <p class="text-gray-300 leading-relaxed">
+                        不要只卖单机，针对欧美市场应开发“即插即用”家庭能源管理套件，并适配当地电价波谷充电逻辑。
+                    </p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="text-center py-8 text-gray-500 text-sm border-t border-white/10 mt-12">
+        &copy; 2026 跨境出海智库 - 全球视野 决策有道
+    </footer>
+</body>
+</html>
