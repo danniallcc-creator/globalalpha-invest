@@ -216,6 +216,7 @@
         async function fetchTikTok() {
             try {
                 const res = await fetch(`${API_BASE}/tiktok/trending`);
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 const grid = document.getElementById('video-grid');
                 grid.innerHTML = data.videos.map(v => `
@@ -229,12 +230,21 @@
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.warn("Using TikTok Demo Data");
+                const grid = document.getElementById('video-grid');
+                grid.innerHTML = `
+                    <div class="card p-8 rounded-2xl text-center text-gray-500 col-span-full border-dashed border-2 border-white/10">
+                        【演示模式】启动后端后即可展示 TikTok 实时热门视频流
+                    </div>
+                `;
+            }
         }
 
         async function fetchEcom() {
             try {
                 const res = await fetch(`${API_BASE}/ecom/trending`);
+                if (!res.ok) throw new Error();
                 const data = await res.json();
                 const grid = document.getElementById('ecom-grid');
                 grid.innerHTML = Object.entries(data.platforms).map(([region, items]) => `
@@ -255,7 +265,27 @@
                         </div>
                     </div>
                 `).join('');
-            } catch (e) { console.error(e); }
+            } catch (e) { 
+                console.warn("Using Ecom Demo Data");
+                const grid = document.getElementById('ecom-grid');
+                const demoItems = [
+                    {region: "东南亚 (Shopee)", product: "无线耳机", growth: "42%", icon: "🎧"},
+                    {region: "拉美 (Mercado Libre)", product: "太阳能灯", growth: "55%", icon: "💡"},
+                    {region: "欧洲 (OTTO)", product: "智能家居", growth: "62%", icon: "🏠"}
+                ];
+                grid.innerHTML = demoItems.map(item => `
+                    <div class="card p-6 rounded-2xl">
+                        <h3 class="text-blue-400 font-bold mb-4">📍 ${item.region}</h3>
+                        <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
+                            <span class="text-2xl">${item.icon}</span>
+                            <div>
+                                <div class="text-sm font-bold">${item.product}</div>
+                                <div class="text-xs text-gray-400">Demo • 增长 ${item.growth}</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            }
         }
 
         function toggleChat() {
@@ -273,13 +303,19 @@
             input.value = "";
             msgs.scrollTop = msgs.scrollHeight;
 
-            const res = await fetch(`${API_BASE}/ai-chat`, {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({message: msg})
-            });
-            const data = await res.json();
-            msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
+            try {
+                const res = await fetch(`${API_BASE}/ai-chat`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({message: msg})
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
+            } catch (e) {
+                console.warn("Backend not reachable. Using Demo Response.");
+                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">【演示模式】收到您的咨询：‘${msg}’。<br><br>由于后端服务尚未连接，目前无法调用 AI 检索。请在本地启动后端服务以开启真实智库咨询。</div>`;
+            }
             msgs.scrollTop = msgs.scrollHeight;
         }
 
