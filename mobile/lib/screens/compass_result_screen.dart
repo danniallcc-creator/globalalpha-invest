@@ -33,6 +33,7 @@ class CompassResultScreen extends StatelessWidget {
                     style: ElevatedButton.styleFrom(primary: Colors.blueAccent, padding: EdgeInsets.symmetric(vertical: 12)),
                     onPressed: () {
                       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('正在生成 $category 深度报告 PDF...')));
+                      // In a real app, call ApiService.fetchReport(category) and use url_launcher to open result['download_url']
                     },
                   ),
                 ),

@@ -1,11 +1,32 @@
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, Query, Depends, HTTPException
+from fastapi.staticfiles import StaticFiles
+from sqlalchemy.orm import Session
 from typing import List, Optional
 import json
+import os
 
 from backend.app.services.trends_service import TrendsService
 from backend.app.services.market_service import MarketService
+from backend.app.services.report_service import ReportService
+from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog
 
 app = FastAPI(title="Cross-border Export Intelligence API")
+
+# Initialize DB on startup
+@app.on_event("startup")
+def startup():
+    init_db()
+
+# Mount Static Files
+app.mount("/reports", StaticFiles(directory="static/reports"), name="reports")
+
+# Dependency to get DB session
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
 
 # Mock Database for Countries
 COUNTRIES_DB = [
@@ -65,10 +86,6 @@ def get_market_data():
 
 from pydantic import BaseModel
 
-# Mock User & Favorites DB
-USERS_DB = {"admin": "password123"}
-USER_FAVORITES = {"admin": []}
-
 class LoginRequest(BaseModel):
     username: str
     password: str
@@ -100,43 +117,61 @@ def ai_chat(req: ChatRequest):
     return {"status": "success", "reply": response}
 
 @app.post("/api/login")
-def login(req: LoginRequest):
-    if req.username in USERS_DB and USERS_DB[req.username] == req.password:
+def login(req: LoginRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == req.username).first()
+    if not user:
+        # Auto-create for demo
+        user = User(username=req.username, password=req.password)
+        db.add(user)
+        db.commit()
+        return {"status": "success", "username": req.username, "msg": "New account created"}
+    
+    if user.password == req.password:
         return {"status": "success", "username": req.username}
     return {"status": "error", "message": "Invalid credentials"}
 
 @app.post("/api/favorites/add")
-def add_favorite(req: FavoriteRequest):
-    if req.username not in USER_FAVORITES:
-        USER_FAVORITES[req.username] = []
-    if req.item not in USER_FAVORITES[req.username]:
-        USER_FAVORITES[req.username].append(req.item)
-    return {"status": "success", "favorites": USER_FAVORITES[req.username]}
+def add_favorite(req: FavoriteRequest, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == req.username).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+    
+    # Check if exists
+    exists = db.query(Favorite).filter(Favorite.user_id == user.id, Favorite.item == req.item).first()
+    if not exists:
+        new_fav = Favorite(item=req.item, user_id=user.id)
+        db.add(new_fav)
+        db.commit()
+    return {"status": "success", "favorites": [f.item for f in user.favorites]}
 
 @app.get("/api/favorites/{username}")
-def get_favorites(username: str):
-    return USER_FAVORITES.get(username, [])
+def get_favorites(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return []
+    return [f.item for f in user.favorites]
 
 @app.get("/api/report/generate")
 def generate_report(category: str):
-    # Generating a structured report summary
-    report_content = f"""
-# {category} 跨境出海深度报告
-日期: 2026-06-01
----
-## 1. 核心发现
-- **首选利润国**: 德国, 澳大利亚
-- **首选规模国**: 美国
-- **首选蓝海国**: 巴西, 印度尼西亚
-
-## 2. 行业趋势与合规
-- **趋势**: LiFePO4 电池与 1.5H 快充成为标配。
-- **合规**: 美国 UL 2743, 欧洲 CE-LVD 认证为准入红线。
-
-## 3. AI 专家建议
-针对该品类，建议重点布局具备“极端天气适应性”的产品，主攻德国冬季市场。
-    """
-    return {"status": "success", "report_preview": report_content, "download_url": f"/reports/{category}_report.pdf"}
+    # Fetch data for the report
+    compass_data = get_compass(category)
+    ai_insight = TrendsService.get_ai_insight(category)
+    
+    report_data = {
+        "recommendations": compass_data["recommendations"],
+        "ai_insight": ai_insight
+    }
+    
+    filename = f"{category.replace(' ', '_')}_report.pdf"
+    file_path = f"static/reports/{filename}"
+    
+    # Generate actual PDF
+    ReportService.generate_pdf(category, report_data, file_path)
+    
+    return {
+        "status": "success", 
+        "download_url": f"http://localhost:8000/reports/{filename}"
+    }
 
 @app.get("/api/sourcing")
 def get_ai_sourcing(category: str):
