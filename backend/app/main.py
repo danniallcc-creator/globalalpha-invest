@@ -3,6 +3,7 @@ from typing import List, Optional
 import json
 
 from backend.app.services.trends_service import TrendsService
+from backend.app.services.market_service import MarketService
 
 app = FastAPI(title="Cross-border Export Intelligence API")
 
@@ -17,7 +18,11 @@ COUNTRIES_DB = [
 
 # Load Compliance Data
 with open("../../data/compliance/building_materials.json", "r", encoding="utf-8") as f:
-    COMPLIANCE_DATA = json.load(f)
+    BUILDING_DATA = json.load(f)
+with open("../../data/compliance/industry_compliance.json", "r", encoding="utf-8") as f:
+    INDUSTRY_DATA = json.load(f)
+
+COMPLIANCE_DATA = BUILDING_DATA + INDUSTRY_DATA
 
 @app.get("/")
 def read_root():
@@ -44,15 +49,18 @@ def search_compliance(q: str):
 
 @app.get("/api/market")
 def get_market_data():
+    rates = MarketService.get_exchange_rates()
+    gold = MarketService.get_gold_price()
     return {
-        "gold": {"price": 2345.67, "unit": "USD/oz", "change": "+0.5%"},
+        "gold": gold,
         "forex": [
-            {"pair": "USD/CNY", "rate": 7.24},
-            {"pair": "EUR/CNY", "rate": 7.85},
-            {"pair": "JPY/CNY", "rate": 0.046},
-            {"pair": "AUD/CNY", "rate": 4.81},
-            {"pair": "GBP/CNY", "rate": 9.21}
-        ]
+            {"pair": "USD/CNY", "rate": 1/rates.get("USD") if rates.get("USD") else 7.24},
+            {"pair": "EUR/CNY", "rate": 1/rates.get("EUR") if rates.get("EUR") else 7.85},
+            {"pair": "JPY/CNY", "rate": 1/rates.get("JPY") if rates.get("JPY") else 0.046},
+            {"pair": "AUD/CNY", "rate": 1/rates.get("AUD") if rates.get("AUD") else 4.81},
+            {"pair": "GBP/CNY", "rate": 1/rates.get("GBP") if rates.get("GBP") else 9.21}
+        ],
+        "last_update": rates.get("last_update")
     }
 
 from pydantic import BaseModel
