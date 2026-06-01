@@ -169,10 +169,12 @@ def generate_report(category: str):
     # Fetch data for the report
     compass_data = get_compass(category)
     ai_insight = TrendsService.get_ai_insight(category)
+    ecom_trends = LocalEcomService.get_all_platforms()
     
     report_data = {
         "recommendations": compass_data["recommendations"],
-        "ai_insight": ai_insight
+        "ai_insight": ai_insight,
+        "ecom_trends": ecom_trends
     }
     
     filename = f"{category.replace(' ', '_')}_report.pdf"
