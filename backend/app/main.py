@@ -12,8 +12,42 @@ from backend.app.services.tiktok_service import TikTokService
 from backend.app.services.local_ecom_service import LocalEcomService
 from backend.app.services.competitor_service import CompetitorService
 from backend.app.services.customs_service import CustomsService
+from fastapi import FastAPI, Query, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from jose import JWTError, jwt
 from backend.app.database import SessionLocal, init_db, User, Favorite, ChatLog, TeamReport
-from datetime import datetime
+from datetime import datetime, timedelta
+
+# JWT Configuration
+SECRET_KEY = "CROSS_BORDER_SECRET_KEY_2026" # Change in production
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24 # 24 hours
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="api/auth/login")
+
+def create_access_token(data: dict):
+    to_encode = data.copy()
+    expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    to_encode.update({"exp": expire})
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+async def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+    except JWTError:
+        raise credentials_exception
+    user = db.query(User).filter(User.username == username).first()
+    if user is None:
+        raise credentials_exception
+    return user
 
 app = FastAPI(title="Cross-border Export Intelligence API")
 
@@ -21,6 +55,26 @@ app = FastAPI(title="Cross-border Export Intelligence API")
 @app.on_event("startup")
 def startup():
     init_db()
+
+@app.post("/api/auth/register")
+def register(username: str, password: str, company_id: int, db: Session = Depends(get_db)):
+    db_user = db.query(User).filter(User.username == username).first()
+    if db_user:
+        raise HTTPException(status_code=400, detail="Username already registered")
+    hashed_pwd = User.get_password_hash(password)
+    new_user = User(username=username, hashed_password=hashed_pwd, company_id=company_id)
+    db.add(new_user)
+    db.commit()
+    return {"status": "success"}
+
+@app.post("/api/auth/login")
+def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == form_data.username).first()
+    if not user or not user.verify_password(form_data.password):
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    access_token = create_access_token(data={"sub": user.username})
+    return {"access_token": access_token, "token_type": "bearer", "username": user.username}
 
 # Mount Static Files
 app.mount("/reports", StaticFiles(directory="static/reports"), name="reports")
@@ -206,7 +260,7 @@ def get_full_intel(category: str):
     }
 
 @app.get("/api/report/generate")
-def generate_report(category: str, username: Optional[str] = "guest", db: Session = Depends(get_db)):
+def generate_report(category: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     # 1. Fetch data for the report
     intel_data = get_full_intel(category)
     
@@ -216,18 +270,16 @@ def generate_report(category: str, username: Optional[str] = "guest", db: Sessio
     # Generate actual PDF
     ReportService.generate_pdf(category, intel_data, file_path)
     
-    # 2. Save to Enterprise Team Library if user exists
-    user = db.query(User).filter(User.username == username).first()
-    if user:
-        new_report = TeamReport(
-            category=category,
-            filename=filename,
-            created_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
-            company_id=user.company_id,
-            user_id=user.id
-        )
-        db.add(new_report)
-        db.commit()
+    # 2. Save to Enterprise Team Library
+    new_report = TeamReport(
+        category=category,
+        filename=filename,
+        created_at=datetime.now().strftime("%Y-%m-%d %H:%M"),
+        company_id=current_user.company_id,
+        user_id=current_user.id
+    )
+    db.add(new_report)
+    db.commit()
     
     return {
         "status": "success", 
@@ -236,12 +288,8 @@ def generate_report(category: str, username: Optional[str] = "guest", db: Sessio
     }
 
 @app.get("/api/team/reports")
-def get_team_reports(username: str, query: Optional[str] = None, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username).first()
-    if not user:
-        return []
-    
-    q = db.query(TeamReport).filter(TeamReport.company_id == user.company_id)
+def get_team_reports(query: Optional[str] = None, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    q = db.query(TeamReport).filter(TeamReport.company_id == current_user.company_id)
     if query:
         q = q.filter(TeamReport.category.contains(query))
         
@@ -249,12 +297,8 @@ def get_team_reports(username: str, query: Optional[str] = None, db: Session = D
     return reports
 
 @app.get("/api/team/members")
-def get_team_members(username: str, db: Session = Depends(get_db)):
-    user = db.query(User).filter(User.username == username).first()
-    if not user:
-        return []
-    
-    members = db.query(User).filter(User.company_id == user.company_id).all()
+def get_team_members(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
+    members = db.query(User).filter(User.company_id == current_user.company_id).all()
     return [{"username": m.username, "role": m.role} for m in members]
 
 @app.get("/api/sourcing")

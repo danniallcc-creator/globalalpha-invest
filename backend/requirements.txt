@@ -6,3 +6,6 @@ fpdf2
 pydantic
 python-multipart
 python-dotenv
+PyJWT
+passlib[bcrypt]
+python-jose[cryptography]

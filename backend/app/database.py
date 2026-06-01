@@ -1,6 +1,10 @@
 from sqlalchemy import create_all, Column, Integer, String, Text, ForeignKey, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, relationship
+from passlib.context import CryptContext
+
+# Password hashing
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 SQLALCHEMY_DATABASE_URL = "sqlite:///./cross_border.db"
 
@@ -13,11 +17,18 @@ class User(Base):
     __tablename__ = "users"
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True, index=True)
-    password = Column(String)
+    hashed_password = Column(String)
     role = Column(String, default="analyst") # analyst, manager, admin
     company_id = Column(Integer, index=True) # For multi-tenant collaboration
     favorites = relationship("Favorite", back_populates="owner")
     team_reports = relationship("TeamReport", back_populates="creator")
+
+    def verify_password(self, password):
+        return pwd_context.verify(password, self.hashed_password)
+
+    @staticmethod
+    def get_password_hash(password):
+        return pwd_context.hash(password)
 
 class TeamReport(Base):
     __tablename__ = "team_reports"

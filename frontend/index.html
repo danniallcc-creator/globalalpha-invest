@@ -25,6 +25,48 @@
         <div id="last-update" class="text-gray-400 text-xs"></div>
     </div>
 
+    <nav class="bg-black/20 backdrop-blur-md border-b border-white/10 sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-8 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-600 p-1.5 rounded-lg text-xl">🌍</div>
+                <h1 class="text-xl font-bold tracking-tight">Cross-border <span class="text-blue-500">Intel</span></h1>
+            </div>
+            <div class="flex items-center gap-6 text-sm">
+                <div id="user-info" class="hidden flex items-center gap-4">
+                    <span id="nav-username" class="text-gray-300 font-medium"></span>
+                    <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors">退出</button>
+                </div>
+                <div id="auth-links" class="flex gap-4">
+                    <button onclick="showAuthModal('login')" class="text-gray-400 hover:text-white transition-colors">登录</button>
+                    <button onclick="showAuthModal('register')" class="bg-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">注册团队</button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-white/10 p-8 rounded-3xl w-full max-w-md relative shadow-2xl">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-white">×</button>
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center">登录智库</h2>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">用户名</label>
+                    <input type="text" id="auth-username" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">密码</label>
+                    <input type="password" id="auth-password" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div id="register-fields" class="hidden">
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">企业识别码 (Company ID)</label>
+                    <input type="number" id="auth-company" value="1001" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20">确认</button>
+            </form>
+        </div>
+    </div>
+
     <main class="max-w-6xl mx-auto p-8">
         <header class="text-center mb-12">
             <h1 class="text-4xl font-bold mb-4">全球 80% 消费地图罗盘</h1>
@@ -65,20 +107,17 @@
             </div>
         </div>
 
-        <!-- Team Workspace Section (New) -->
-        <div id="team-workspace" class="mb-16">
+        <!-- Team Workspace Section -->
+        <div id="team-workspace" class="mb-16 hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold flex items-center gap-3">
                     <span>🏢</span> 企业团队工作台
                 </h2>
                 <div class="flex gap-4">
                     <input id="report-search" type="text" placeholder="搜索报告..." class="bg-white/10 rounded-lg px-4 py-2 text-sm outline-none border border-white/10" oninput="fetchTeamReports()">
-                    <button class="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-bold border border-blue-600/30">团队成员</button>
                 </div>
             </div>
-            <div id="reports-library" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- Reports will be injected here -->
-            </div>
+            <div id="reports-library" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
         <!-- Compliance Section -->
@@ -108,102 +147,109 @@
         <!-- Download Full Report Button -->
         <div id="download-section" class="text-center mb-16 hidden">
             <button id="dl-btn" onclick="downloadReport()" class="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold py-4 px-12 rounded-full shadow-xl transition-all hover:scale-105">
-                下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)
+                下载完整 PDF 调研报告
             </button>
-        </div>
-
-        <!-- TikTok Video Feed -->
-        <div id="tiktok-feed" class="mb-16">
-            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span>🎥</span> TikTok 实时热门视频
-            </h2>
-            <div id="video-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                <!-- Videos will be injected here -->
-            </div>
-        </div>
-
-        <!-- Local E-commerce Section -->
-        <div id="ecom-feed" class="mb-16">
-            <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
-                <span>🛒</span> 全球本土电商爆款
-            </h2>
-            <div id="ecom-grid" class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <!-- Regions will be injected here -->
-            </div>
         </div>
     </main>
 
-    <!-- AI Chat Floating Button -->
-    <div class="fixed bottom-8 right-8 z-50">
-        <button onclick="toggleChat()" class="bg-blue-600 w-16 h-16 rounded-full shadow-xl flex items-center justify-center text-3xl hover:scale-110 transition-transform">💬</button>
-        <div id="chat-box" class="chat-window absolute bottom-20 right-0 w-80 bg-gray-900 border border-white/20 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[450px]">
-            <div class="bg-blue-600 p-4 font-bold flex justify-between">
-                <span>AI 智库助手</span>
-                <button onclick="toggleChat()">×</button>
-            </div>
-            <div id="chat-messages" class="flex-1 p-4 overflow-y-auto space-y-4 text-sm scrollbar-hide">
-                <div class="bg-white/10 p-3 rounded-lg">您好！我是您的出海助手。您可以问我任何关于行业合规或选品趋势的问题。</div>
-            </div>
-            <div class="p-4 bg-black/20 flex gap-2">
-                <input id="chat-input" type="text" placeholder="输入问题..." class="flex-1 bg-white/10 rounded-lg px-3 py-2 outline-none">
-                <button onclick="sendMessage()" class="bg-blue-600 px-4 py-2 rounded-lg">发送</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         const API_BASE = "http://localhost:8000/api";
-        let isOffline = false;
+        let authToken = localStorage.getItem('auth_token');
+
+        function updateAuthUI() {
+            const username = localStorage.getItem('username');
+            if (authToken && username) {
+                document.getElementById('auth-links').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('nav-username').innerText = username;
+                document.getElementById('team-workspace').classList.remove('hidden');
+                fetchTeamReports();
+            } else {
+                document.getElementById('auth-links').classList.remove('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+                document.getElementById('team-workspace').classList.add('hidden');
+            }
+        }
 
         async function apiFetch(url, options = {}) {
-            const controller = new AbortController();
-            const id = setTimeout(() => controller.abort(), 1500); // 1.5s timeout for local backend
+            const headers = options.headers || {};
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
             try {
-                const response = await fetch(url, { ...options, signal: controller.signal });
-                clearTimeout(id);
-                return response;
-            } catch (e) {
-                isOffline = true;
-                throw e;
-            }
+                const res = await fetch(url, { ...options, headers });
+                if (res.status === 401 && authToken) logout();
+                return res;
+            } catch (e) { throw e; }
+        }
+
+        function showAuthModal(mode) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-title').innerText = mode === 'login' ? '登录智库' : '注册团队账户';
+            document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('auth-form').dataset.mode = mode;
+        }
+
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const mode = document.getElementById('auth-form').dataset.mode;
+            const username = document.getElementById('auth-username').value;
+            const password = document.getElementById('auth-password').value;
+            const companyId = document.getElementById('auth-company').value;
+
+            try {
+                if (mode === 'register') {
+                    const res = await fetch(`${API_BASE}/auth/register?username=${username}&password=${password}&company_id=${companyId}`, { method: 'POST' });
+                    if (!res.ok) throw new Error("注册失败");
+                    alert("注册成功，请登录");
+                    showAuthModal('login');
+                } else {
+                    const formData = new FormData();
+                    formData.append('username', username);
+                    formData.append('password', password);
+                    const res = await fetch(`${API_BASE}/auth/login`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.access_token) {
+                        authToken = data.access_token;
+                        localStorage.setItem('auth_token', authToken);
+                        localStorage.setItem('username', data.username);
+                        closeAuthModal();
+                        updateAuthUI();
+                    } else { throw new Error(data.detail || "登录失败"); }
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('username');
+            updateAuthUI();
         }
 
         async function fetchMarket() {
             try {
-                const res = await apiFetch(`${API_BASE}/market`);
+                const res = await apiFetch(`${API_BASE}/market/summary`);
                 const data = await res.json();
-                const gold = data.gold;
-                document.getElementById('gold-price').innerHTML = `
-                    伦敦金: <span class="font-bold">$${gold.price}</span> 
-                    <span class="text-xs ${gold.change.startsWith('-') ? 'text-red-400' : 'text-green-400'}">
-                        (${gold.change})
-                    </span>
-                    <span class="text-[10px] text-gray-500 ml-1">昨收: $${gold.prev_close}</span>
-                `;
-                document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `
-                    <span class="mr-2">${f.pair}: <span class="font-bold">${f.rate.toFixed(4)}</span></span>
-                `).join(' | ');
-                document.getElementById('last-update').innerText = `数据源: ${data.source} | 更新: ${data.last_update}`;
-                
-                const status = document.getElementById('backend-status');
-                status.innerHTML = '<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接';
-                status.className = "bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[10px] flex items-center gap-1";
-            } catch (e) { 
-                document.getElementById('gold-price').innerText = `伦敦金: $4,522.57 (演示数据)`;
-                document.getElementById('fx-rates').innerHTML = `USD/CNY: 6.7657 | EUR/CNY: 7.8793 | JPY/CNY: 0.0424`;
-                document.getElementById('last-update').innerText = `模式: 离线演示`;
+                document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change}%)`;
+                document.getElementById('fx-rates').innerText = `USD/CNY: ${data.fx.USD.toFixed(4)} | EUR/CNY: ${data.fx.EUR.toFixed(4)}`;
+                document.getElementById('backend-status').innerHTML = `<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接`;
+                document.getElementById('backend-status').classList.replace('bg-red-500/20', 'bg-green-500/20');
+                document.getElementById('backend-status').classList.replace('text-red-400', 'text-green-400');
+            } catch (e) {
+                document.getElementById('gold-price').innerText = "伦敦金: $4,522.57 (Demo)";
+                document.getElementById('fx-rates').innerText = "USD/CNY: 6.7657 | EUR/CNY: 7.3421 (Demo)";
             }
         }
 
         async function runCompass() {
             const cat = document.getElementById('search-input').value;
             if (!cat) return;
+            if (!authToken) { alert("请先登录以使用智库功能"); showAuthModal('login'); return; }
             
-            // Immediately show results container and scroll
-            const resultsDiv = document.getElementById('results');
-            resultsDiv.classList.remove('hidden');
+            document.getElementById('results').classList.remove('hidden');
             document.getElementById('download-section').classList.remove('hidden');
-            window.scrollTo({ top: resultsDiv.offsetTop - 100, behavior: 'smooth' });
+            window.scrollTo({ top: document.getElementById('results').offsetTop - 100, behavior: 'smooth' });
 
             try {
                 const res = await apiFetch(`${API_BASE}/intel?category=${cat}`);
@@ -226,566 +272,66 @@
                     const item = data.compliance_info[0];
                     document.getElementById('compliance-content').innerHTML = `
                         <div class="border-r border-white/10 pr-8">
-                            <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
-                            <p class="text-gray-300 text-sm">${item.reason}</p>
+                            <h3 class="text-blue-400 font-bold mb-2">准入红线</h3><p class="text-gray-300 text-sm">${item.reason}</p>
                         </div>
                         <div>
-                            <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
-                            <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
-                        </div>
-                    `;
+                            <h3 class="text-green-400 font-bold mb-2">转型锦囊</h3><p class="text-gray-300 text-sm italic">${item.suggestion}</p>
+                        </div>`;
                 }
 
-                // Render Pricing
                 document.getElementById('pricing-section').classList.remove('hidden');
                 document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
                     <div class="card p-5 rounded-2xl">
                         <div class="text-xs text-blue-400 font-bold mb-2 uppercase">${region}</div>
-                        <div class="flex justify-between items-baseline mb-4">
-                            <span class="text-2xl font-bold">${info.currency} ${info.mid_range}</span>
-                            <span class="text-xs text-green-400">Mid-range</span>
-                        </div>
-                        <div class="space-y-3">
-                            ${info.top_products.map(p => `
-                                <div class="bg-white/5 p-2 rounded-lg">
-                                    <div class="text-[10px] font-bold text-gray-300 truncate">${p.name}</div>
-                                    <div class="flex justify-between items-center mt-1">
-                                        <span class="text-xs text-blue-400">${info.currency} ${p.price}</span>
-                                        <span class="text-[9px] text-yellow-400">⭐ ${p.rating} (${p.reviews})</span>
-                                    </div>
-                                    <div class="text-[8px] mt-1 ${p.stock_status === 'In Stock' ? 'text-green-500' : 'text-red-400'}">${p.stock_status}</div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <div class="mt-4 pt-3 border-t border-white/5 space-y-1 text-xs text-gray-400">
-                            <div class="flex justify-between"><span>入门价:</span><span>${info.currency} ${info.entry_level}</span></div>
-                            <div class="flex justify-between"><span>旗舰价:</span><span>${info.currency} ${info.premium}</span></div>
-                        </div>
-                    </div>
-                `).join('');
-
-                // Render Customs
-                document.getElementById('customs-section').classList.remove('hidden');
-                const c = data.customs_stats;
-                document.getElementById('customs-content').innerHTML = `
-                    <div>
-                        <h3 class="text-gray-400 text-sm mb-1">HS Code (类目)</h3>
-                        <div class="text-2xl font-bold">${c.hs_code}</div>
-                        <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
-                        <div class="mt-4 pt-4 border-t border-white/5">
-                            <h4 class="text-xs font-bold text-red-400 uppercase mb-2">风险预警 (Alerts)</h4>
-                            <div class="space-y-1 text-[10px] text-gray-300">
-                                ${c.risk_alerts.map(a => `<div>⚠️ ${a}</div>`).join('')}
-                            </div>
-                        </div>
-                    </div>
-                    <div class="border-x border-white/10 px-8">
-                        <h3 class="text-gray-400 text-sm mb-1">全球市场份额 (2025-26)</h3>
-                        <div class="space-y-2 mb-4">
-                            ${Object.entries(c.global_market_share).map(([country, share]) => `
-                                <div class="text-xs">
-                                    <div class="flex justify-between mb-1"><span>${country}</span><span>${share}</span></div>
-                                    <div class="w-full bg-white/5 h-1 rounded-full"><div class="bg-blue-500 h-1 rounded-full" style="width: ${share}"></div></div>
-                                </div>
-                            `).join('')}
-                        </div>
-                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">主要市场关税</h4>
-                        <div class="space-y-1 text-[11px]">
-                            <div class="flex justify-between"><span>美国:</span><span class="text-red-400">${c.tariffs.USA}</span></div>
-                            <div class="flex justify-between"><span>欧盟:</span><span>${c.tariffs.EU}</span></div>
-                            <div class="flex justify-between"><span>RCEP:</span><span class="text-green-400">${c.tariffs.RCEP}</span></div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-400 text-sm mb-1">物流时效 (平均)</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-sm"><span>美西海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to US West)']}天</span></div>
-                            <div class="flex justify-between text-sm"><span>欧洲海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to Europe)']}天</span></div>
-                            <div class="flex justify-between text-sm"><span>全球空运</span><span class="text-blue-400">${c.average_shipping_days['Air (Mainland to Global)']}天</span></div>
-                        </div>
-                    </div>
-                `;
-                fetchTeamReports(); // Refresh library after generate
-            } catch (e) {
-                // Mock Full Results for demo
-                const demoData = [
-                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
-                    {name: "澳大利亚 (演示)", gdp: "65.0k", growth: "2.5"},
-                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
-                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
-                ];
-                document.getElementById('profit-list').innerHTML = `
-                    <div class="card p-4 rounded-xl mb-3"><div class="font-bold">${demoData[0].name}</div><p class="text-xs text-gray-400">高客单价核心市场</p></div>
-                    <div class="card p-4 rounded-xl"><div class="font-bold">${demoData[1].name}</div><p class="text-xs text-gray-400">能源补贴高增长区</p></div>`;
-                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[2].name}</div><p class="text-xs text-gray-400">成熟基建大规模市场</p></div>`;
-                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[3].name}</div><p class="text-xs text-gray-400">人口年轻高速增长区</p></div>`;
-                
-                document.getElementById('compliance-section').classList.remove('hidden');
-                document.getElementById('compliance-content').innerHTML = `
-                    <div class="border-r border-white/10 pr-8">
-                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (离线演示)</h3>
-                        <p class="text-gray-300 text-sm">该品类在欧美通常需要 CE/UL 认证，且需满足当地最新的 EPR 包装法要求。</p>
-                    </div>
-                    <div>
-                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (离线演示)</h3>
-                        <p class="text-gray-300 text-sm italic">建议针对当地能源政策开发“一键并网”套件，提高产品的技术壁垒 and 溢价空间。</p>
-                    </div>
-                `;
-
-                document.getElementById('pricing-section').classList.remove('hidden');
-                document.getElementById('pricing-grid').innerHTML = `
-                    <div class="card p-5 rounded-2xl opacity-60">
-                        <div class="text-xs text-blue-400 font-bold mb-2 uppercase">北美 (演示)</div>
-                        <div class="text-2xl font-bold">$ 129.00</div>
-                        <div class="text-xs text-gray-400 mt-2">启动后端查看真实行情</div>
-                    </div>
-                `.repeat(4);
-            }
-
-                // Render Pricing
-                document.getElementById('pricing-section').classList.remove('hidden');
-                document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
-                    <div class="card p-5 rounded-2xl">
-                        <div class="text-xs text-blue-400 font-bold mb-2 uppercase">${region}</div>
-                        <div class="flex justify-between items-baseline mb-4">
-                            <span class="text-2xl font-bold">${info.currency} ${info.mid_range}</span>
-                            <span class="text-xs text-green-400">Mid-range</span>
-                        </div>
+                        <div class="text-2xl font-bold mb-4">${info.currency} ${info.mid_range}</div>
                         <div class="space-y-2 text-xs text-gray-400">
-                            <div class="flex justify-between"><span>入门级:</span><span>${info.currency} ${info.entry_level}</span></div>
-                            <div class="flex justify-between"><span>旗舰级:</span><span>${info.currency} ${info.premium}</span></div>
-                            <div class="pt-2 border-t border-white/5">主要竞品: ${info.top_competitors[0]}...</div>
+                            ${info.top_products.map(p => `<div>• ${p.name} (${info.currency}${p.price})</div>`).join('')}
                         </div>
-                    </div>
-                `).join('');
+                    </div>`).join('');
 
-                // Render Customs
                 document.getElementById('customs-section').classList.remove('hidden');
                 const c = data.customs_stats;
                 document.getElementById('customs-content').innerHTML = `
-                    <div>
-                        <h3 class="text-gray-400 text-sm mb-1">HS Code (类目)</h3>
-                        <div class="text-2xl font-bold">${c.hs_code}</div>
-                        <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
-                    </div>
-                    <div class="border-x border-white/10 px-8">
-                        <h3 class="text-gray-400 text-sm mb-1">主要出口枢纽/港口</h3>
-                        <div class="space-y-1">
-                            ${c.top_export_hubs.map(h => `<div class="text-sm">📍 ${h}</div>`).join('')}
-                            <div class="text-xs text-blue-400 mt-2">目的港: ${c.main_destination_ports[0]}...</div>
-                        </div>
-                    </div>
-                    <div>
-                        <h3 class="text-gray-400 text-sm mb-1">物流时效 (平均)</h3>
-                        <div class="space-y-2">
-                            <div class="flex justify-between text-sm"><span>美西海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to US West)']}天</span></div>
-                            <div class="flex justify-between text-sm"><span>欧洲海运</span><span class="text-blue-400">${c.average_shipping_days['Ocean (Mainland to Europe)']}天</span></div>
-                            <div class="flex justify-between text-sm"><span>全球空运</span><span class="text-blue-400">${c.average_shipping_days['Air (Mainland to Global)']}天</span></div>
-                        </div>
-                    </div>
-                `;
-
-            } catch (e) {
-                // Mock Full Results for demo
-                const demoData = [
-                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
-                    {name: "澳大利亚 (演示)", gdp: "65.0k", growth: "2.5"},
-                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
-                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
-                ];
-                document.getElementById('profit-list').innerHTML = `
-                    <div class="card p-4 rounded-xl mb-3"><div class="font-bold">${demoData[0].name}</div><p class="text-xs text-gray-400">高客单价核心市场</p></div>
-                    <div class="card p-4 rounded-xl"><div class="font-bold">${demoData[1].name}</div><p class="text-xs text-gray-400">能源补贴高增长区</p></div>`;
-                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[2].name}</div><p class="text-xs text-gray-400">成熟基建大规模市场</p></div>`;
-                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl"><div class="font-bold">${demoData[3].name}</div><p class="text-xs text-gray-400">人口年轻高速增长区</p></div>`;
+                    <div><h3 class="text-gray-400 text-sm mb-1">HS Code</h3><div class="text-2xl font-bold">${c.hs_code}</div><div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div></div>
+                    <div class="border-x border-white/10 px-8"><h3 class="text-gray-400 text-sm mb-1">风险预警</h3><div class="text-[10px] text-red-400">${c.risk_alerts.join('<br>')}</div></div>
+                    <div><h3 class="text-gray-400 text-sm mb-1">关税概览</h3><div class="text-[11px]">美国: ${c.tariffs.USA}<br>欧盟: ${c.tariffs.EU}</div></div>`;
                 
-                document.getElementById('compliance-section').classList.remove('hidden');
-                document.getElementById('compliance-content').innerHTML = `
-                    <div class="border-r border-white/10 pr-8">
-                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (离线演示)</h3>
-                        <p class="text-gray-300 text-sm">该品类在欧美通常需要 CE/UL 认证，且需满足当地最新的 EPR 包装法要求。</p>
-                    </div>
-                    <div>
-                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (离线演示)</h3>
-                        <p class="text-gray-300 text-sm italic">建议针对当地能源政策开发“一键并网”套件，提高产品的技术壁垒和溢价空间。</p>
-                    </div>
-                `;
-            }
-        }
-
-        async function downloadReport() {
-            const cat = document.getElementById('search-input').value;
-            if (!cat) return;
-            const btn = document.getElementById('dl-btn');
-            btn.innerHTML = "正在生成深度报告...";
-            try {
-                const res = await fetch(`${API_BASE}/report/generate?category=${cat}`);
-                const data = await res.json();
-                window.open(data.download_url);
-                btn.innerHTML = "下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)";
-            } catch (e) {
-                alert("生成失败。请确保后端服务已启动且网络连接正常。");
-                btn.innerHTML = "下载完整 PDF 调研报告 (Market, Industry, Compliance & Recommendations)";
-            }
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value;
-            if (!msg) return;
-            
-            const msgs = document.getElementById('chat-messages');
-            msgs.innerHTML += `<div class="bg-blue-600/20 p-3 rounded-lg text-right ml-8">${msg}</div>`;
-            input.value = "";
-            msgs.scrollTop = msgs.scrollHeight;
-
-            try {
-                const res = await apiFetch(`${API_BASE}/ai-chat`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message: msg})
-                });
-                const data = await res.json();
-                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
-            } catch (e) {
-                const demoReply = `针对您的咨询“${msg}”，在离线演示模式下，我可以为您提供一般性建议：\n\n1. **市场选择**：优先考虑人均GDP高且有相关补贴政策的国家（如德、澳）。\n2. **合规准入**：确保具备目标市场的核心认证（如CE/FCC）。\n3. **选品建议**：关注TikTok上近期搜索增速超过100%的热门标签。\n\n*请连接后端以获取基于真实智库数据的深度回复。*`;
-                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${demoReply.replace(/\n/g, '<br>')}</div>`;
-            }
-            msgs.scrollTop = msgs.scrollHeight;
-        }
-
-        async function fetchTikTok() {
-            try {
-                const res = await apiFetch(`${API_BASE}/tiktok/trending`);
-                const data = await res.json();
-                const grid = document.getElementById('video-grid');
-                grid.innerHTML = data.videos.map(v => `
-                    <div class="card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.open('${v.video_url}')">
-                        <div class="aspect-[9/16] relative bg-cover bg-center" style="background-image: url('${v.cover_url}')">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
-                                <div class="text-xs text-pink-400 font-bold mb-1">${v.author}</div>
-                                <div class="text-sm font-bold line-clamp-2">${v.title}</div>
-                                <div class="text-xs text-gray-400 mt-2">${v.play_count} views</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { 
-                const grid = document.getElementById('video-grid');
-                grid.innerHTML = `
-                    <div class="card p-8 rounded-2xl text-center text-gray-500 col-span-full border-dashed border-2 border-white/10">
-                        【演示模式】启动后端后即可展示 TikTok 实时热门视频流
-                    </div>
-                `;
-            }
-        }
-
-        async function fetchEcom() {
-            try {
-                const res = await apiFetch(`${API_BASE}/ecom/trending`);
-                const data = await res.json();
-                const grid = document.getElementById('ecom-grid');
-                grid.innerHTML = Object.entries(data.platforms).map(([region, items]) => `
-                    <div class="card p-6 rounded-2xl">
-                        <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
-                            <span>📍</span> ${region}
-                        </h3>
-                        <div class="space-y-4">
-                            ${items.map(item => `
-                                <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
-                                    <span class="text-2xl">${item.icon}</span>
-                                    <div>
-                                        <div class="text-sm font-bold">${item.product}</div>
-                                        <div class="text-xs text-gray-400">${item.platform} • 增长 ${item.growth}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { 
-                const grid = document.getElementById('ecom-grid');
-                const demoItems = [
-                    {region: "东南亚 (Shopee)", product: "无线耳机", growth: "42%", icon: "🎧"},
-                    {region: "拉美 (Mercado Libre)", product: "太阳能灯", growth: "55%", icon: "💡"},
-                    {region: "欧洲 (OTTO)", product: "智能家居", growth: "62%", icon: "🏠"}
-                ];
-                grid.innerHTML = demoItems.map(item => `
-                    <div class="card p-6 rounded-2xl">
-                        <h3 class="text-blue-400 font-bold mb-4">📍 ${item.region}</h3>
-                        <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
-                            <span class="text-2xl">${item.icon}</span>
-                            <div>
-                                <div class="text-sm font-bold">${item.product}</div>
-                                <div class="text-xs text-gray-400">Demo • 增长 ${item.growth}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        fetchMarket();
-        fetchTikTok();
-        fetchEcom();
-        setInterval(fetchMarket, 60000);
-    </script>
-
-        }
-
-        async function runCompass() {
-            const cat = document.getElementById('search-input').value;
-            if (!cat) return;
-            
-            // Show loading state or just proceed to result
-            document.getElementById('results').classList.remove('hidden');
-            
-            try {
-                const res = await fetch(`${API_BASE}/compass?category=${cat}`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                
-                const renderList = (id, list) => {
-                    document.getElementById(id).innerHTML = list.map(c => `
-                        <div class="card p-4 rounded-xl">
-                            <div class="font-bold text-lg">${c.name}</div>
-                            <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
-                        </div>
-                    `).join('');
-                };
-                renderList('profit-list', data.recommendations.profit_market);
-                renderList('mass-list', data.recommendations.mass_market);
-                renderList('blue-list', data.recommendations.blue_ocean);
-
-                // Fetch Compliance
-                const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
-                const cData = await cRes.json();
-                if (cData.length > 0) {
-                    document.getElementById('compliance-section').classList.remove('hidden');
-                    const item = cData[0];
-                    document.getElementById('compliance-content').innerHTML = `
-                        <div class="border-r border-white/10 pr-8">
-                            <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
-                            <p class="text-gray-300 text-sm">${item.reason}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
-                            <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
-                        </div>
-                    `;
-                }
-            } catch (e) {
-                console.warn("Using Compass Demo Data");
-                // Mock Results for demo
-                const demoData = [
-                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
-                    {name: "澳洲 (演示)", gdp: "65.0k", growth: "2.5"},
-                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
-                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
-                ];
-                document.getElementById('profit-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[0].name}</div><div class="card p-4 rounded-xl font-bold">${demoData[1].name}</div>`;
-                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[2].name}</div>`;
-                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[3].name}</div>`;
-                
-                // Show compliance with a generic sample
-                document.getElementById('compliance-section').classList.remove('hidden');
-                document.getElementById('compliance-content').innerHTML = `
-                    <div class="border-r border-white/10 pr-8">
-                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (演示)</h3>
-                        <p class="text-gray-300 text-sm">由于未连接后端，此处展示样板：该品类在欧美通常需要 CE/UL 认证。</p>
-                    </div>
-                    <div>
-                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (演示)</h3>
-                        <p class="text-gray-300 text-sm italic">建议针对当地电价波谷开发智能充电逻辑，提高产品附加值。</p>
-                    </div>
-                `;
-            }
-            
-            // Scroll to results
-            window.scrollTo({ top: document.getElementById('results').offsetTop - 100, behavior: 'smooth' });
-        }
-
-
-        async function runCompass() {
-            const cat = document.getElementById('search-input').value;
-            if (!cat) return;
-            const res = await fetch(`${API_BASE}/compass?category=${cat}`);
-            const data = await res.json();
-            
-            document.getElementById('results').classList.remove('hidden');
-            const renderList = (id, list) => {
-                document.getElementById(id).innerHTML = list.map(c => `
-                    <div class="bg-white/5 p-4 rounded-xl">
-                        <div class="font-bold text-lg">${c.name}</div>
-                        <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
-                    </div>
-                `).join('');
-            };
-            renderList('profit-list', data.recommendations.profit_market);
-            renderList('mass-list', data.recommendations.mass_market);
-            renderList('blue-list', data.recommendations.blue_ocean);
-
-            // Fetch Compliance
-            const cRes = await fetch(`${API_BASE}/compliance?q=${cat.slice(0,2)}`);
-            const cData = await cRes.json();
-            if (cData.length > 0) {
-                document.getElementById('compliance-section').classList.remove('hidden');
-                const item = cData[0];
-                document.getElementById('compliance-content').innerHTML = `
-                    <div class="border-r border-white/10 pr-8">
-                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (Redline)</h3>
-                        <p class="text-gray-300 text-sm">${item.reason}</p>
-                    </div>
-                    <div>
-                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (Insight)</h3>
-                        <p class="text-gray-300 text-sm italic">${item.suggestion}</p>
-                    </div>
-                `;
-            }
-        }
-
-        async function fetchTikTok() {
-            try {
-                const res = await fetch(`${API_BASE}/tiktok/trending`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                const grid = document.getElementById('video-grid');
-                grid.innerHTML = data.videos.map(v => `
-                    <div class="card rounded-2xl overflow-hidden group cursor-pointer" onclick="window.open('${v.video_url}')">
-                        <div class="aspect-[9/16] relative bg-cover bg-center" style="background-image: url('${v.cover_url}')">
-                            <div class="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex flex-col justify-end p-4">
-                                <div class="text-xs text-pink-400 font-bold mb-1">${v.author}</div>
-                                <div class="text-sm font-bold line-clamp-2">${v.title}</div>
-                                <div class="text-xs text-gray-400 mt-2">${v.play_count} views</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { 
-                console.warn("Using TikTok Demo Data");
-                const grid = document.getElementById('video-grid');
-                grid.innerHTML = `
-                    <div class="card p-8 rounded-2xl text-center text-gray-500 col-span-full border-dashed border-2 border-white/10">
-                        【演示模式】启动后端后即可展示 TikTok 实时热门视频流
-                    </div>
-                `;
-            }
-        }
-
-        async function fetchEcom() {
-            try {
-                const res = await fetch(`${API_BASE}/ecom/trending`);
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                const grid = document.getElementById('ecom-grid');
-                grid.innerHTML = Object.entries(data.platforms).map(([region, items]) => `
-                    <div class="card p-6 rounded-2xl">
-                        <h3 class="text-blue-400 font-bold mb-4 flex items-center gap-2">
-                            <span>📍</span> ${region}
-                        </h3>
-                        <div class="space-y-4">
-                            ${items.map(item => `
-                                <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
-                                    <span class="text-2xl">${item.icon}</span>
-                                    <div>
-                                        <div class="text-sm font-bold">${item.product}</div>
-                                        <div class="text-xs text-gray-400">${item.platform} • 增长 ${item.growth}</div>
-                                    </div>
-                                </div>
-                            `).join('')}
-                        </div>
-                    </div>
-                `).join('');
-            } catch (e) { 
-                console.warn("Using Ecom Demo Data");
-                const grid = document.getElementById('ecom-grid');
-                const demoItems = [
-                    {region: "东南亚 (Shopee)", product: "无线耳机", growth: "42%", icon: "🎧"},
-                    {region: "拉美 (Mercado Libre)", product: "太阳能灯", growth: "55%", icon: "💡"},
-                    {region: "欧洲 (OTTO)", product: "智能家居", growth: "62%", icon: "🏠"}
-                ];
-                grid.innerHTML = demoItems.map(item => `
-                    <div class="card p-6 rounded-2xl">
-                        <h3 class="text-blue-400 font-bold mb-4">📍 ${item.region}</h3>
-                        <div class="bg-white/5 p-3 rounded-xl flex items-center gap-3">
-                            <span class="text-2xl">${item.icon}</span>
-                            <div>
-                                <div class="text-sm font-bold">${item.product}</div>
-                                <div class="text-xs text-gray-400">Demo • 增长 ${item.growth}</div>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-            }
-        }
-
-        function toggleChat() {
-            const box = document.getElementById('chat-box');
-            box.style.display = box.style.display === 'flex' ? 'none' : 'flex';
-        }
-
-        async function sendMessage() {
-            const input = document.getElementById('chat-input');
-            const msg = input.value;
-            if (!msg) return;
-            
-            const msgs = document.getElementById('chat-messages');
-            msgs.innerHTML += `<div class="bg-blue-600/20 p-3 rounded-lg text-right ml-8">${msg}</div>`;
-            input.value = "";
-            msgs.scrollTop = msgs.scrollHeight;
-
-            try {
-                const res = await fetch(`${API_BASE}/ai-chat`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({message: msg})
-                });
-                if (!res.ok) throw new Error();
-                const data = await res.json();
-                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">${data.reply.replace(/\n/g, '<br>')}</div>`;
-            } catch (e) {
-                console.warn("Backend not reachable. Using Demo Response.");
-                msgs.innerHTML += `<div class="bg-white/10 p-3 rounded-lg mr-8">【演示模式】收到您的咨询：‘${msg}’。<br><br>由于后端服务尚未连接，目前无法调用 AI 检索。请在本地启动后端服务以开启真实智库咨询。</div>`;
-            }
-            msgs.scrollTop = msgs.scrollHeight;
+                fetchTeamReports();
+            } catch (e) { alert("获取智库数据失败，请检查网络连接"); }
         }
 
         async function fetchTeamReports() {
             const query = document.getElementById('report-search').value;
             try {
-                const res = await fetch(`${API_BASE}/team/reports?username=guest&query=${query}`);
+                const res = await apiFetch(`${API_BASE}/team/reports?query=${query}`);
                 const data = await res.json();
                 const lib = document.getElementById('reports-library');
                 if (data.length === 0) {
-                    lib.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">暂无团队调研报告，开始您的第一次搜索吧！</div>`;
+                    lib.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">暂无团队调研报告</div>`;
                     return;
                 }
                 lib.innerHTML = data.map(r => `
-                    <div class="card p-5 rounded-2xl flex justify-between items-center group">
-                        <div>
-                            <div class="font-bold text-blue-400 mb-1">${r.category}</div>
-                            <div class="text-[10px] text-gray-500">${r.created_at} • 由 ${r.user_id === 1 ? '团队主管' : '分析员'} 生成</div>
-                        </div>
-                        <a href="${API_BASE.replace('/api', '')}/reports/${r.filename}" target="_blank" class="bg-white/5 p-3 rounded-full hover:bg-blue-600 transition-colors">
-                            <span class="text-xl">📄</span>
-                        </a>
-                    </div>
-                `).join('');
-            } catch (e) {
-                console.warn("Team Reports offline or backend not ready");
-                document.getElementById('reports-library').innerHTML = `
-                    <div class="card p-5 rounded-2xl flex justify-between items-center opacity-50">
-                        <div><div class="font-bold mb-1">户外储能 (演示)</div><div class="text-[10px]">2026-06-01 • 离线预览</div></div>
-                        <span class="text-xl">📄</span>
-                    </div>
-                `.repeat(3);
-            }
+                    <div class="card p-5 rounded-2xl flex justify-between items-center">
+                        <div><div class="font-bold text-blue-400 mb-1">${r.category}</div><div class="text-[10px] text-gray-500">${r.created_at}</div></div>
+                        <a href="${API_BASE.replace('/api', '')}/reports/${r.filename}" target="_blank" class="text-xl">📄</a>
+                    </div>`).join('');
+            } catch (e) { }
         }
 
+        async function downloadReport() {
+            const cat = document.getElementById('search-input').value;
+            const btn = document.getElementById('dl-btn');
+            btn.innerText = "正在生成...";
+            try {
+                const res = await apiFetch(`${API_BASE}/report/generate?category=${cat}`);
+                const data = await res.json();
+                window.open(data.download_url);
+                btn.innerText = "下载完整 PDF 调研报告";
+            } catch (e) { alert("下载失败"); btn.innerText = "下载完整 PDF 调研报告"; }
+        }
+
+        updateAuthUI();
         fetchMarket();
-        fetchTikTok();
-        fetchEcom();
-        fetchTeamReports();
         setInterval(fetchMarket, 60000);
     </script>
 </body>
