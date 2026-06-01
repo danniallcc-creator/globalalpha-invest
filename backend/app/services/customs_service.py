@@ -5,7 +5,7 @@ class CustomsService:
     def get_customs_stats(category: str):
         """
         Simulated Customs & Logistics Data (HS Code Level Insight).
-        In production, this would integrate with UN Comtrade or Chinese Customs API.
+        Enhanced with Import Tariffs for major markets.
         """
         # Simulated HS Code mapping
         hs_codes = {
@@ -25,6 +25,12 @@ class CustomsService:
                 "Ocean (Mainland to US West)": 18,
                 "Ocean (Mainland to Europe)": 35,
                 "Air (Mainland to Global)": 5
+            },
+            "tariffs": {
+                "USA": f"{random.choice(['0%', '2.5%', '7.5%'])} + 301 (25%)",
+                "EU": f"{random.randint(0, 12)}%",
+                "Southeast Asia (RCEP)": "0% (Form E Required)",
+                "Latin America": f"{random.randint(10, 25)}%"
             },
             "top_exporting_countries": ["China", "Vietnam", "Germany", "South Korea"]
         }

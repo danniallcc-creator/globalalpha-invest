@@ -236,13 +236,26 @@ def generate_report(category: str, username: Optional[str] = "guest", db: Sessio
     }
 
 @app.get("/api/team/reports")
-def get_team_reports(username: str, db: Session = Depends(get_db)):
+def get_team_reports(username: str, query: Optional[str] = None, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.username == username).first()
     if not user:
         return []
     
-    reports = db.query(TeamReport).filter(TeamReport.company_id == user.company_id).all()
+    q = db.query(TeamReport).filter(TeamReport.company_id == user.company_id)
+    if query:
+        q = q.filter(TeamReport.category.contains(query))
+        
+    reports = q.order_by(TeamReport.id.desc()).all()
     return reports
+
+@app.get("/api/team/members")
+def get_team_members(username: str, db: Session = Depends(get_db)):
+    user = db.query(User).filter(User.username == username).first()
+    if not user:
+        return []
+    
+    members = db.query(User).filter(User.company_id == user.company_id).all()
+    return [{"username": m.username, "role": m.role} for m in members]
 
 @app.get("/api/sourcing")
 def get_ai_sourcing(category: str):

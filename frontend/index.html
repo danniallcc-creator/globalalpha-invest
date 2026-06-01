@@ -65,6 +65,22 @@
             </div>
         </div>
 
+        <!-- Team Workspace Section (New) -->
+        <div id="team-workspace" class="mb-16">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold flex items-center gap-3">
+                    <span>🏢</span> 企业团队工作台
+                </h2>
+                <div class="flex gap-4">
+                    <input id="report-search" type="text" placeholder="搜索报告..." class="bg-white/10 rounded-lg px-4 py-2 text-sm outline-none border border-white/10" oninput="fetchTeamReports()">
+                    <button class="bg-blue-600/20 text-blue-400 px-4 py-2 rounded-lg text-sm font-bold border border-blue-600/30">团队成员</button>
+                </div>
+            </div>
+            <div id="reports-library" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Reports will be injected here -->
+            </div>
+        </div>
+
         <!-- Compliance Section -->
         <div id="compliance-section" class="card p-8 rounded-2xl mb-8 hidden">
             <h2 class="text-2xl font-bold mb-6 flex items-center gap-3">
@@ -229,10 +245,21 @@
                             <span class="text-2xl font-bold">${info.currency} ${info.mid_range}</span>
                             <span class="text-xs text-green-400">Mid-range</span>
                         </div>
-                        <div class="space-y-2 text-xs text-gray-400">
-                            <div class="flex justify-between"><span>入门级:</span><span>${info.currency} ${info.entry_level}</span></div>
-                            <div class="flex justify-between"><span>旗舰级:</span><span>${info.currency} ${info.premium}</span></div>
-                            <div class="pt-2 border-t border-white/5">主要竞品: ${info.top_competitors[0]}...</div>
+                        <div class="space-y-3">
+                            ${info.top_products.map(p => `
+                                <div class="bg-white/5 p-2 rounded-lg">
+                                    <div class="text-[10px] font-bold text-gray-300 truncate">${p.name}</div>
+                                    <div class="flex justify-between items-center mt-1">
+                                        <span class="text-xs text-blue-400">${info.currency} ${p.price}</span>
+                                        <span class="text-[9px] text-yellow-400">⭐ ${p.rating} (${p.reviews})</span>
+                                    </div>
+                                    <div class="text-[8px] mt-1 ${p.stock_status === 'In Stock' ? 'text-green-500' : 'text-red-400'}">${p.stock_status}</div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-4 pt-3 border-t border-white/5 space-y-1 text-xs text-gray-400">
+                            <div class="flex justify-between"><span>入门价:</span><span>${info.currency} ${info.entry_level}</span></div>
+                            <div class="flex justify-between"><span>旗舰价:</span><span>${info.currency} ${info.premium}</span></div>
                         </div>
                     </div>
                 `).join('');
@@ -245,6 +272,14 @@
                         <h3 class="text-gray-400 text-sm mb-1">HS Code (类目)</h3>
                         <div class="text-2xl font-bold">${c.hs_code}</div>
                         <div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div>
+                        <div class="mt-4 pt-4 border-t border-white/5">
+                            <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">主要市场关税 (Tariffs)</h4>
+                            <div class="space-y-1 text-[11px]">
+                                <div class="flex justify-between"><span>美国:</span><span class="text-red-400">${c.tariffs.USA}</span></div>
+                                <div class="flex justify-between"><span>欧盟:</span><span>${c.tariffs.EU}</span></div>
+                                <div class="flex justify-between"><span>RCEP:</span><span class="text-green-400">${c.tariffs['Southeast Asia (RCEP)']}</span></div>
+                            </div>
+                        </div>
                     </div>
                     <div class="border-x border-white/10 px-8">
                         <h3 class="text-gray-400 text-sm mb-1">主要出口枢纽/港口</h3>
@@ -262,6 +297,7 @@
                         </div>
                     </div>
                 `;
+                fetchTeamReports(); // Refresh library after generate
             } catch (e) {
                 // Mock Full Results for demo
                 const demoData = [
@@ -706,9 +742,42 @@
             msgs.scrollTop = msgs.scrollHeight;
         }
 
+        async function fetchTeamReports() {
+            const query = document.getElementById('report-search').value;
+            try {
+                const res = await fetch(`${API_BASE}/team/reports?username=guest&query=${query}`);
+                const data = await res.json();
+                const lib = document.getElementById('reports-library');
+                if (data.length === 0) {
+                    lib.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">暂无团队调研报告，开始您的第一次搜索吧！</div>`;
+                    return;
+                }
+                lib.innerHTML = data.map(r => `
+                    <div class="card p-5 rounded-2xl flex justify-between items-center group">
+                        <div>
+                            <div class="font-bold text-blue-400 mb-1">${r.category}</div>
+                            <div class="text-[10px] text-gray-500">${r.created_at} • 由 ${r.user_id === 1 ? '团队主管' : '分析员'} 生成</div>
+                        </div>
+                        <a href="${API_BASE.replace('/api', '')}/reports/${r.filename}" target="_blank" class="bg-white/5 p-3 rounded-full hover:bg-blue-600 transition-colors">
+                            <span class="text-xl">📄</span>
+                        </a>
+                    </div>
+                `).join('');
+            } catch (e) {
+                console.warn("Team Reports offline or backend not ready");
+                document.getElementById('reports-library').innerHTML = `
+                    <div class="card p-5 rounded-2xl flex justify-between items-center opacity-50">
+                        <div><div class="font-bold mb-1">户外储能 (演示)</div><div class="text-[10px]">2026-06-01 • 离线预览</div></div>
+                        <span class="text-xl">📄</span>
+                    </div>
+                `.repeat(3);
+            }
+        }
+
         fetchMarket();
         fetchTikTok();
         fetchEcom();
+        fetchTeamReports();
         setInterval(fetchMarket, 60000);
     </script>
 </body>
