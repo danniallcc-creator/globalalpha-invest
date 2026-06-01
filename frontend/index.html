@@ -17,6 +17,10 @@
         <div class="flex gap-4">
             <span id="gold-price" class="text-yellow-400">加载中...</span>
             <span id="fx-rates"></span>
+            <span id="backend-status" class="bg-red-500/20 text-red-400 px-2 py-0.5 rounded text-[10px] flex items-center gap-1">
+                <span class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></span>
+                演示模式
+            </span>
         </div>
         <div id="last-update" class="text-gray-400 text-xs"></div>
     </div>
@@ -119,10 +123,16 @@
                 document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change || '+0.5%'})`;
                 document.getElementById('fx-rates').innerHTML = data.forex.slice(0, 3).map(f => `<span>${f.pair}: ${f.rate.toFixed(2)}</span>`).join(' | ');
                 document.getElementById('last-update').innerText = `更新时间: ${new Date(data.last_update).toLocaleString()}`;
+                
+                // Update status to online
+                const status = document.getElementById('backend-status');
+                status.innerHTML = '<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接';
+                status.className = "bg-green-500/20 text-green-400 px-2 py-0.5 rounded text-[10px] flex items-center gap-1";
             } catch (e) { 
                 console.warn("Backend not reachable. Using Demo Data.");
-                document.getElementById('gold-price').innerText = `伦敦金: $2,345.67 (Demo)`;
+                document.getElementById('gold-price').innerText = `伦敦金: $2,345.67 (演示数据)`;
                 document.getElementById('fx-rates').innerHTML = `USD/CNY: 7.24 | EUR/CNY: 7.85 | JPY/CNY: 0.046`;
+                document.getElementById('last-update').innerText = `模式: 离线演示`;
             }
         }
 
@@ -130,12 +140,14 @@
             const cat = document.getElementById('search-input').value;
             if (!cat) return;
             
+            // Show loading state or just proceed to result
+            document.getElementById('results').classList.remove('hidden');
+            
             try {
                 const res = await fetch(`${API_BASE}/compass?category=${cat}`);
                 if (!res.ok) throw new Error();
                 const data = await res.json();
                 
-                document.getElementById('results').classList.remove('hidden');
                 const renderList = (id, list) => {
                     document.getElementById(id).innerHTML = list.map(c => `
                         <div class="card p-4 rounded-xl">
@@ -166,12 +178,34 @@
                     `;
                 }
             } catch (e) {
-                alert("进入预览演示模式。请在本地启动后端以使用真实算法。");
-                document.getElementById('results').classList.remove('hidden');
-                document.getElementById('profit-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">德国 (Demo)</div>`;
-                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">美国 (Demo)</div>`;
-                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">巴西 (Demo)</div>`;
+                console.warn("Using Compass Demo Data");
+                // Mock Results for demo
+                const demoData = [
+                    {name: "德国 (演示)", gdp: "51.0k", growth: "1.5"},
+                    {name: "澳洲 (演示)", gdp: "65.0k", growth: "2.5"},
+                    {name: "美国 (演示)", gdp: "76.0k", growth: "2.1"},
+                    {name: "巴西 (演示)", gdp: "9.0k", growth: "4.5"}
+                ];
+                document.getElementById('profit-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[0].name}</div><div class="card p-4 rounded-xl font-bold">${demoData[1].name}</div>`;
+                document.getElementById('mass-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[2].name}</div>`;
+                document.getElementById('blue-list').innerHTML = `<div class="card p-4 rounded-xl font-bold">${demoData[3].name}</div>`;
+                
+                // Show compliance with a generic sample
+                document.getElementById('compliance-section').classList.remove('hidden');
+                document.getElementById('compliance-content').innerHTML = `
+                    <div class="border-r border-white/10 pr-8">
+                        <h3 class="text-blue-400 font-bold mb-2">准入红线 (演示)</h3>
+                        <p class="text-gray-300 text-sm">由于未连接后端，此处展示样板：该品类在欧美通常需要 CE/UL 认证。</p>
+                    </div>
+                    <div>
+                        <h3 class="text-green-400 font-bold mb-2">转型锦囊 (演示)</h3>
+                        <p class="text-gray-300 text-sm italic">建议针对当地电价波谷开发智能充电逻辑，提高产品附加值。</p>
+                    </div>
+                `;
             }
+            
+            // Scroll to results
+            window.scrollTo({ top: document.getElementById('results').offsetTop - 100, behavior: 'smooth' });
         }
 
 
