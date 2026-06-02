@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: globalalpha-web
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn api.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: DATABASE_URL
+        value: sqlite:///./cross_border.db
+      - key: STRIPE_API_KEY
+        value: sk_test_mock_key
+      - key: SECRET_KEY
+        generateValue: true

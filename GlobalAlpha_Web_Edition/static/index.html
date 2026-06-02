@@ -32,45 +32,15 @@
                 <h1 class="text-xl font-bold tracking-tight">Cross-border <span class="text-blue-500">Intel</span></h1>
             </div>
         <div class="flex items-center gap-6 text-sm">
-            <div id="user-info" class="hidden flex items-center gap-4">
+            <div id="user-info" class="flex items-center gap-4">
                 <div class="flex flex-col items-end">
-                    <span id="nav-username" class="text-gray-300 font-medium"></span>
-                    <span class="text-[10px] text-blue-400">智库点数: <span id="user-credits">0</span></span>
-                </div>
-                <button onclick="buyCredits()" class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-md text-[10px] font-bold border border-blue-600/30 hover:bg-blue-600 hover:text-white transition-all">充值</button>
-                <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors">退出</button>
-            </div>
-            <div id="auth-links" class="flex gap-4">
-
-                    <button onclick="showAuthModal('login')" class="text-gray-400 hover:text-white transition-colors">登录</button>
-                    <button onclick="showAuthModal('register')" class="bg-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">注册团队</button>
+                    <span class="text-gray-300 font-medium">公共访客</span>
+                    <span class="text-[10px] text-blue-400">智库点数: <span id="user-credits">999+</span></span>
                 </div>
             </div>
+        </div>
         </div>
     </nav>
-
-    <!-- Auth Modal -->
-    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
-        <div class="bg-gray-900 border border-white/10 p-8 rounded-3xl w-full max-w-md relative shadow-2xl">
-            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-white">×</button>
-            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center">登录智库</h2>
-            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">用户名</label>
-                    <input type="text" id="auth-username" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">密码</label>
-                    <input type="password" id="auth-password" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
-                </div>
-                <div id="register-fields" class="hidden">
-                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">企业识别码 (Company ID)</label>
-                    <input type="number" id="auth-company" value="1001" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
-                </div>
-                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20">确认</button>
-            </form>
-        </div>
-    </div>
 
     <main class="max-w-6xl mx-auto p-8">
         <header class="text-center mb-12">
@@ -113,7 +83,7 @@
         </div>
 
         <!-- Team Workspace Section -->
-        <div id="team-workspace" class="mb-16 hidden">
+        <div id="team-workspace" class="mb-16">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold flex items-center gap-3">
                     <span>🏢</span> 企业团队工作台
@@ -195,11 +165,8 @@
         }
 
         async function apiFetch(url, options = {}) {
-            const headers = options.headers || {};
-            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
             try {
-                const res = await fetch(url, { ...options, headers });
-                if (res.status === 401 && authToken) logout();
+                const res = await fetch(url, options);
                 return res;
             } catch (e) { throw e; }
         }
@@ -268,7 +235,6 @@
         async function runCompass() {
             const cat = document.getElementById('search-input').value;
             if (!cat) return;
-            if (!authToken) { alert("请先登录以使用智库功能"); showAuthModal('login'); return; }
             
             document.getElementById('results').classList.remove('hidden');
             document.getElementById('download-section').classList.remove('hidden');

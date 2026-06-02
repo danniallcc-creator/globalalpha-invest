@@ -19,7 +19,10 @@
    ```
 3. 访问：`http://localhost:8000`
 
-## 快速部署 (Docker)
+## 快速部署 (One-Click Deploy)
+该目录已配置 `render.yaml`。您可以直接在 [Render.com](https://render.com) 关联此仓库，系统将自动识别配置并启动全栈服务。
+
+## Docker 部署
 1. 构建并运行：
    ```bash
    docker-compose up --build -d

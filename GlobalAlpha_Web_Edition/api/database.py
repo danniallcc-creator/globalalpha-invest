@@ -60,3 +60,12 @@ class ChatLog(Base):
 
 def init_db():
     Base.metadata.create_all(bind=engine)
+    db = SessionLocal()
+    # Create a default Public User for Web Edition (No login required mode)
+    public_user = db.query(User).filter(User.username == "PublicGuest").first()
+    if not public_user:
+        hashed_pwd = pwd_context.hash("public_guest_pwd_2026")
+        public_user = User(username="PublicGuest", hashed_password=hashed_pwd, company_id=1001, credits=999, role="Admin")
+        db.add(public_user)
+        db.commit()
+    db.close()
