@@ -44,16 +44,12 @@ class PaymentService:
             return {"error": str(e)}
 
     @staticmethod
-    def verify_webhook(payload: str, sig_header: str, webhook_secret: str):
-        """Verify the Stripe webhook signature."""
-        if sig_header == "mock_signature":
-            import json
-            return json.loads(payload)
+    def verify_payment(session_id: str):
+        """Verify the payment with Stripe."""
+        if STRIPE_API_KEY == "sk_test_mock_key":
+            return True
         try:
-            event = stripe.Webhook.construct_event(
-                payload, sig_header, webhook_secret
-            )
-            return event
-        except Exception as e:
-            print(f"Webhook error: {e}")
-            return None
+            session = stripe.checkout.Session.retrieve(session_id)
+            return session.payment_status == 'paid'
+        except:
+            return False

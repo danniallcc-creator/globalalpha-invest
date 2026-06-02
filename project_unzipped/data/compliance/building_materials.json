@@ -1,0 +1,74 @@
+[
+  {
+    "category": "其他建筑工程与房地产",
+    "direct_export": false,
+    "reason": "属于服务而非标准商品，受限于各国施工资质、劳工法及土地法规。",
+    "transformable": true,
+    "breakthrough": "数字化与预制化：将工程服务转化为BIM数据包或预制模块出口。",
+    "case": "某央企海外工程部：从直接派工人施工受阻，转为提供符合国际IFC标准的BIM设计包+预制构件，由当地团队组装，成功落地“一带一路”项目。",
+    "suggestion": "建立符合国际标准的Revit/BIM族库，让海外建筑师在设计阶段调用你的模型；仅出口预制组件。"
+  },
+  {
+    "category": "土工材料",
+    "direct_export": false,
+    "reason": "测试标准差异巨大。国内多用GB标准，欧美强制要求ASTM D4632（抓斗法）测试，内贸产品数据通常不被认可。",
+    "transformable": true,
+    "breakthrough": "测试标准对标：调整生产工艺以满足ASTM/ISO的强力与渗透率指标。",
+    "case": "山东BPM土工材料：针对欧美排水需求，调整针刺工艺提高渗透率，并获得TRI实验室的ASTM认证，成功打入美国填埋场项目。",
+    "suggestion": "建立内部实验室模拟ASTM测试；在技术参数表中标注MARV（最小平均罗尔值）而非平均值。"
+  },
+  {
+    "category": "地板供暖系统及配件",
+    "direct_export": false,
+    "reason": "电压不符（美标120V/240V），且缺乏UL/ETL电气安全认证，极易被海关扣押或导致火灾责任。",
+    "transformable": true,
+    "breakthrough": "电压与形态转化：开发120V美标产品，将散线改为DIY友好的“网垫式”套装。",
+    "case": "Senphus（森普斯）：放弃出口散线，开发了带UL认证的“即插即用”加热垫套装，并配套WiFi智能温控器，成功进入亚马逊和Home Depot。",
+    "suggestion": "必须获得UL 1683认证；开发含温控器、传感器、发热垫的完整DIY安装包。"
+  },
+  {
+    "category": "地板及配件",
+    "direct_export": false,
+    "reason": "欧美对华实木复合地板征收高额反倾销税；锁扣专利侵权风险；甲醛释放标准严苛（TSCA Title VI）。",
+    "transformable": true,
+    "breakthrough": "材质替代：从木质转向**SPC（石塑）**或LVT地板，规避关税和甲醛问题。",
+    "case": "浙江裕华木业：在Lumber Liquidators甲醛丑闻后，迅速转型生产零甲醛的SPC锁扣地板，并购买Unilin锁扣专利，重获美国大客户信任。",
+    "suggestion": "彻底转型SPC/LVT；购买Unilin/Valinge锁扣专利授权；获得FloorScore认证。"
+  },
+  {
+    "category": "塑料建材",
+    "direct_export": "部分",
+    "reason": "环保法规限制。内贸常用铅盐稳定剂，在欧盟REACH和加州65提案下属违禁品。",
+    "transformable": true,
+    "breakthrough": "配方升级：改用钙锌稳定剂；提升防火等级至UL 94 V-0。",
+    "case": "Ensinger Plastics：调整工程塑料配方，去除重金属并达到EN 45545铁路防火标准，成功从低端建材转型进入欧洲轨道交通供应链。",
+    "suggestion": "剔除配方中的铅、镉；申请GreenGuard Gold认证以进入室内公装市场。"
+  },
+  {
+    "category": "塑料管",
+    "direct_export": false,
+    "reason": "尺寸制式不同（公制 vs 英制/美标Schedule 40/80）；缺乏NSF饮用水安全认证。",
+    "transformable": true,
+    "breakthrough": "模具重开与认证：开设英制模具；通过NSF-pw（饮用水）认证。",
+    "case": "中国联塑 (Lesso)：针对北美市场专门开设ASTM D1785标准的Schedule 40 PVC管材模具，并打印NSF标章，与国内公制产品线完全物理隔离。",
+    "suggestion": "必须重开英制模具；管身喷码必须包含ASTM标准号、NSF标志、生产日期。"
+  },
+  {
+    "category": "活动房屋与钢结构",
+    "direct_export": false,
+    "reason": "欧盟强制EN 1090认证；预埋水电不符合当地标准。",
+    "transformable": true,
+    "breakthrough": "壳体出口策略：仅出口认证钢骨架；水电留空由当地安装。",
+    "case": "某集装箱房企业：因预埋电线不符澳洲AS 3000被拆除，后改为出口“空壳”+结构计算书，由当地电工现场布线，顺利通过验收。",
+    "suggestion": "获得EN 1090认证；不预埋任何水电管线，或仅预埋符合当地标准的线管。"
+  },
+  {
+    "category": "凉亭和户外商用喷泉",
+    "direct_export": false,
+    "reason": "1. 电气安全不足认证；2. 结构风雪载荷计算书缺失；3. 材料禁令（澳洲禁硅）。",
+    "transformable": true,
+    "breakthrough": "核心部件认证与结构计算。",
+    "case": "某铝制凉亭工厂：通过改进设计和强度，通过了180km/h风速测试，成功拿下希尔顿订单。",
+    "suggestion": "水泵需UL/CE认证；提供由当地注册工程师（PE）盖章的结构计算书；澳洲市场改用GRC替代含硅石材。"
+  }
+]

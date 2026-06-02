@@ -1,0 +1,205 @@
+[
+    {
+        "category": "机电产品 (Mechanical and Electrical Products)",
+        "restriction": "需符合目的地国能效标准、电磁兼容 (EMC) 及安全认证（如 CE, UL, CB）。",
+        "reason": "涉及用电安全及电网稳定性，且部分产品含氟利昂等环境敏感物质。",
+        "suggestion": "建立全生命周期质量追溯，通过相关能效认证（如 ERP 指令）。",
+        "breakthrough": "向智能制造转型，提供远程诊断及售后全包服务，提升产品附加值。"
+    },
+    {
+        "category": "高新技术产品 (High-tech Products)",
+        "restriction": "涉及双用途物控、出口许可证管理及知识产权合规。",
+        "reason": "技术敏感度高，受国际贸易管制及技术壁垒（TBT）影响大。",
+        "suggestion": "建立内部合规体系（ICP），加强核心专利全球布局。",
+        "breakthrough": "深耕垂直细分领域，通过技术领跑建立行业事实标准。"
+    },
+    {
+        "category": "钢材 (Steel)",
+        "restriction": "常面临反倾销（AD）和反补贴（CVD）调查及欧盟碳边境调节机制（CBAM）。",
+        "reason": "产能过剩行业，受目的地国贸易保护及环保政策强力监管。",
+        "suggestion": "测算并披露产品碳足迹，申请 EPD 环境产品声明认证。",
+        "breakthrough": "向高强度、耐腐蚀等特种钢材转型，避开低端价格战。"
+    },
+    {
+        "category": "成品油 (Refined Oil)",
+        "restriction": "严格受配额制管理及国际能源环保法规约束。",
+        "reason": "涉及能源安全及严格的危化品储存运输标准。",
+        "suggestion": "密切关注商务部出口配额政策，优化供应链物流成本。",
+        "breakthrough": "开拓“一带一路”沿线加油补给网络，提供一体化能源解决方案。"
+    },
+    {
+        "category": "未锻轧铝及铝材 (Aluminum Materials)",
+        "restriction": "受碳关税（CBAM）及美国 232 条款等贸易限制。",
+        "reason": "高耗能行业，受全球减碳目标及资源保护政策影响。",
+        "suggestion": "利用绿电铝资源，提升再生铝使用比例，降低碳强度。",
+        "breakthrough": "进入高端航空及新能源汽车供应链，实现产品高端化升级。"
+    },
+    {
+        "category": "陶瓷产品 (Ceramic Products)",
+        "restriction": "重点监测铅镉溶出量（如美国 FDA 21 CFR）及包装合规。",
+        "reason": "涉及食品接触安全及重金属污染风险。",
+        "suggestion": "加强原材料检测，通过国际食品接触材料认证（FCM）。",
+        "breakthrough": "融合东方美学与现代工艺，打造品牌 IP，进军高端家居礼品市场。"
+    },
+    {
+        "category": "肥料 (Fertilizer)",
+        "restriction": "受目的地国化肥登记制度及有害杂质限量标准约束。",
+        "reason": "直接关系土壤环境、水质及农业安全。",
+        "suggestion": "针对不同土壤特性定制配方，通过本地化肥料登记。",
+        "breakthrough": "发展水溶肥、有机肥等新型环保产品，符合现代农业可持续需求。"
+    },
+    {
+        "category": "稀土 (Rare Earth)",
+        "restriction": "受国家出口许可证及严苛的环保提取标准管理。",
+        "reason": "国家战略资源，受出口配额及国际贸易管制保护。",
+        "suggestion": "深加工下游稀土永磁材料，通过高附加值产品出口。",
+        "breakthrough": "建立全产业链可溯源系统，符合国际供应链透明度要求。"
+    },
+    {
+        "category": "汽车（包括底盘） (Automobiles)",
+        "restriction": "需通过严苛的碰撞测试（Euro NCAP）、排放标准及当地准入认证（如 WVTA）。",
+        "reason": "公共安全第一位，排放水平直接关系目的地国环保考核。",
+        "suggestion": "针对目标市场进行本地化调校，建立完善的海外售后与零部件中心。",
+        "breakthrough": "利用中国新能源汽车先发优势，建立数字化充电生态网络。"
+    },
+    {
+        "category": "汽车零配件 (Auto Parts)",
+        "restriction": "需符合 IATF 16949 体系，主要市场需 E-mark 或 DOT 认证。",
+        "reason": "作为整车供应链一部分，其质量直接影响整车行驶安全。",
+        "suggestion": "争取进入主机厂 OEM 体系，同步进行售后（AM）市场品牌化建设。",
+        "breakthrough": "针对新能源车维修痛点，开发三电系统、热管理系统专属配件。"
+    },
+    {
+        "category": "农产品 (Agricultural Products)",
+        "restriction": "受动植物检验检疫（SPS）及农残（MRL）标准严格限制。",
+        "reason": "防止有害生物入侵及保障食品消费安全。",
+        "suggestion": "建立“从田间到港口”的溯源系统，通过 GLOBAL GAP 认证。",
+        "breakthrough": "发展深加工及冷链技术，提升保鲜期，打造高端有机农业品牌。"
+    },
+    {
+        "category": "水产品 (Aquatic Products)",
+        "restriction": "需满足目的地国冷链卫生标准及可持续捕捞（MSC）认证。",
+        "reason": "易腐食品，重金属（汞）及抗生素残留是监管红线。",
+        "suggestion": "强化冷链温控记录，确保符合 HACCP 体系要求。",
+        "breakthrough": "开发预制菜及精深加工水产品，进军海外零售超市渠道。"
+    },
+    {
+        "category": "粮食 (Grain)",
+        "restriction": "主要受进出口配额及目的地国转基因（GMO）标签法约束。",
+        "reason": "事关国家粮食安全及动植物保护。",
+        "suggestion": "严格执行植物检疫处理，关注双边贸易协议中的配额变化。",
+        "breakthrough": "主打非转基因、功能性原粮，满足高端健康餐饮市场需求。"
+    },
+    {
+        "category": "自动数据处理设备及零部件 (ADP Equipment)",
+        "restriction": "需符合能效、辐射（FCC/CE）及冲突矿产（CM）申报要求。",
+        "reason": "高技术密集，涉及数据安全及原材料来源伦理。",
+        "suggestion": "完善供应链审计，确保核心零部件无数据后门风险。",
+        "breakthrough": "针对海外远程办公需求，开发轻量化、高性能的移动工作站解决方案。"
+    },
+    {
+        "category": "集成电路 (Integrated Circuits)",
+        "restriction": "涉及极高频次的出口管制、瓦森纳协定及知识产权审查。",
+        "reason": "全球核心竞争力焦点，受地缘政治及技术封锁影响极大。",
+        "suggestion": "多元化供应链渠道，加大研发自主知识产权，通过车规级/工控级认证。",
+        "breakthrough": "深耕物联网（IoT）及边缘计算芯片，寻求非敏感领域的规模化应用。"
+    },
+    {
+        "category": "手机 (Mobile Phones)",
+        "restriction": "严格的无线电准入（SRRC/CTA/FCC/CE）及回收政策（WEEE/RoHS）。",
+        "reason": "移动通讯频率需合法，且电子垃圾回收是全球性环保压力。",
+        "suggestion": "建立本地化营销及售后服务中心，符合欧洲可维修性评分要求。",
+        "breakthrough": "利用 5G/AI 影像技术优势，在东南亚、非洲等新兴市场建立生态闭环。"
+    },
+    {
+        "category": "通用机械设备 (General Machinery)",
+        "restriction": "需符合目的地国机械指令（MD）、低压指令（LVD）及压力容器标准。",
+        "reason": "涉及工业操作安全、电气安全及高压爆炸风险。",
+        "suggestion": "提供多语言说明书，加强工人操作安全培训服务。",
+        "breakthrough": "向“服务型制造”转型，提供按需定制及租赁服务模式。"
+    },
+    {
+        "category": "船舶 (Ships)",
+        "restriction": "需符合国际海事组织（IMO）公约及船级社认证（如 DNV, Lloyd's）。",
+        "reason": "海上航行安全及防止船舶污染（MARPOL）是国际强制要求。",
+        "suggestion": "提前布局绿色甲醇、液化天然气（LNG）动力系统研发。",
+        "breakthrough": "在特种作业船（如风电安装船、滚装船）领域形成领先竞争力。"
+    },
+    {
+        "category": "灯具、照明装置及其零件 (Lighting)",
+        "restriction": "需符合光生物安全认证（IEC 62471）及 LED 蓝光标准。",
+        "reason": "涉及视觉健康及电气火灾预防。",
+        "suggestion": "通过 DLC 认证进入北美商业照明市场，提升光效表现。",
+        "breakthrough": "深耕智能家居及户外景观照明，融合 AI 调光与传感器技术。"
+    },
+    {
+        "category": "音视频设备及其零件 (AV Equipment)",
+        "restriction": "涉及版权保护机制（HDCP）、音频专利授权及辐射安全。",
+        "reason": "保护知识产权并防止对公共通讯信号的干扰。",
+        "suggestion": "支付必要的专利池费用（如 MPEG-LA），规避侵权诉讼风险。",
+        "breakthrough": "进军专业级家庭影院及户外移动影音，打造沉浸式视听体验。"
+    },
+    {
+        "category": "医疗仪器及器械 (Medical Instruments)",
+        "restriction": "极高的临床数据要求（MDR/FDA）及严谨的质量体系（ISO 13485）。",
+        "reason": "生命安全不容有失，属于各国监管优先级最高的产品。",
+        "suggestion": "建立海外临床测试中心，选择高信誉等级的当地授权代表。",
+        "breakthrough": "发力便携式、家用化医疗设备，将数字化诊疗延伸至家庭端。"
+    },
+    {
+        "category": "纺织纱线、织物及其制品 (Textiles)",
+        "restriction": "受环保染料限量（Oeko-Tex 100）及溯源透明度要求约束。",
+        "reason": "涉及皮肤接触安全及生产过程中的废水排放问题。",
+        "suggestion": "使用环保生物基纤维，通过全球回收标准（GRS）认证。",
+        "breakthrough": "针对快时尚及高端工装需求，开发具备抗病毒、吸湿快干功能的面料。"
+    },
+    {
+        "category": "服装及衣着附件 (Garments)",
+        "restriction": "面临劳工权益审计（BSCI/SEDEX）及严格的洗涤标识法规。",
+        "reason": "供应链人权透明度及消费者基本知情权是现代贸易门槛。",
+        "suggestion": "优化工厂ESG表现，通过可持续时尚平台提升品牌声誉。",
+        "breakthrough": "利用跨境电商直邮优势，通过 D2C 模式快速响应全球流行趋势。"
+    },
+    {
+        "category": "塑料制品 (Plastic Products)",
+        "restriction": "受限塑令、双酚 A (BPA) 含量检测及生物降解标准限制。",
+        "reason": "白色污染是全球环保公敌，涉及内分泌干扰物风险。",
+        "suggestion": "研发可降解塑料（PLA/PBAT），提升循环塑料回用比例。",
+        "breakthrough": "在高端工业塑料及精密模具领域寻找突破口，避开低值一次性市场。"
+    },
+    {
+        "category": "鞋靴 (Footwear)",
+        "restriction": "受化学品限量（REACH SVHC）、尺寸标准及标签法管理。",
+        "reason": "防止皮革鞣制过程中有害物质残留导致过敏或致癌。",
+        "suggestion": "通过无铬鞣制技术提升环保溢价，进行人体工程学本地化研究。",
+        "breakthrough": "针对户外运动及专业防护鞋（劳保鞋）蓝海市场进行深度开发。"
+    },
+    {
+        "category": "玩具 (Toys)",
+        "restriction": "极严苛的儿童安全标准（EN 71 / ASTM F963）及小零件限制。",
+        "reason": "保障婴幼儿生命安全，防范窒息、误食及重金属中毒。",
+        "suggestion": "建立实验室内部轮抽机制，通过严酷的机械与物理性能测试。",
+        "breakthrough": "开发 STEM 教育玩具，融合 AR/VR 交互，提升寓教于乐价值。"
+    },
+    {
+        "category": "箱包及类似容器 (Luggage)",
+        "restriction": "关注拉链五金重金属含量及耐用性测试标准。",
+        "reason": "涉及消费者耐用品的使用寿命及接触安全性。",
+        "suggestion": "强化提手及轮轴耐磨测试，建立全球保修响应机制。",
+        "breakthrough": "结合智能定位与指纹解锁，打造针对差旅精英的智能箱包品牌。"
+    },
+    {
+        "category": "家用电器 (Home Appliances)",
+        "restriction": "强制性能效贴、待机功耗限制及水效标志要求。",
+        "reason": "节约能源资源及保障家庭用电环境安全。",
+        "suggestion": "针对不同电压制式开发兼容机型，通过本地化实验室能效检测。",
+        "breakthrough": "深耕“单身经济”与“露营经济”的小家电市场，强调设计感与便携性。"
+    },
+    {
+        "category": "家具及其零件 (Furniture)",
+        "restriction": "甲醛释放量（CARB/EPA P2）、阻燃标准及森林溯源（FSC）。",
+        "reason": "室内空气质量直接影响健康，阻燃性涉及火灾安全。",
+        "suggestion": "使用无甲醛胶黏剂，确保木材来源符合可持续森林管理规范。",
+        "breakthrough": "发力扁平化包装（RTA）家具，降低跨境物流成本，主打 DIY 潮流。"
+    }
+]

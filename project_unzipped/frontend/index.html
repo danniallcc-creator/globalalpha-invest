@@ -31,16 +31,46 @@
                 <div class="bg-blue-600 p-1.5 rounded-lg text-xl">🌍</div>
                 <h1 class="text-xl font-bold tracking-tight">Cross-border <span class="text-blue-500">Intel</span></h1>
             </div>
-            <div class="flex items-center gap-6 text-sm">
-                <div id="user-info" class="flex items-center gap-4">
-                    <div class="flex flex-col items-end">
-                        <span class="text-gray-300 font-medium">公共访客</span>
-                        <span class="text-[10px] text-blue-400">智库点数: <span id="user-credits">999+</span></span>
-                    </div>
+        <div class="flex items-center gap-6 text-sm">
+            <div id="user-info" class="hidden flex items-center gap-4">
+                <div class="flex flex-col items-end">
+                    <span id="nav-username" class="text-gray-300 font-medium"></span>
+                    <span class="text-[10px] text-blue-400">智库点数: <span id="user-credits">0</span></span>
+                </div>
+                <button onclick="buyCredits()" class="bg-blue-600/20 text-blue-400 px-3 py-1 rounded-md text-[10px] font-bold border border-blue-600/30 hover:bg-blue-600 hover:text-white transition-all">充值</button>
+                <button onclick="logout()" class="text-gray-500 hover:text-red-400 transition-colors">退出</button>
+            </div>
+            <div id="auth-links" class="flex gap-4">
+
+                    <button onclick="showAuthModal('login')" class="text-gray-400 hover:text-white transition-colors">登录</button>
+                    <button onclick="showAuthModal('register')" class="bg-blue-600 px-4 py-2 rounded-lg font-bold hover:bg-blue-700 transition-colors">注册团队</button>
                 </div>
             </div>
         </div>
     </nav>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-[100] hidden flex items-center justify-center p-4">
+        <div class="bg-gray-900 border border-white/10 p-8 rounded-3xl w-full max-w-md relative shadow-2xl">
+            <button onclick="closeAuthModal()" class="absolute top-4 right-4 text-2xl text-gray-500 hover:text-white">×</button>
+            <h2 id="auth-title" class="text-2xl font-bold mb-6 text-center">登录智库</h2>
+            <form id="auth-form" onsubmit="handleAuth(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">用户名</label>
+                    <input type="text" id="auth-username" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">密码</label>
+                    <input type="password" id="auth-password" required class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <div id="register-fields" class="hidden">
+                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase">企业识别码 (Company ID)</label>
+                    <input type="number" id="auth-company" value="1001" class="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 outline-none focus:border-blue-500 transition-colors">
+                </div>
+                <button type="submit" id="auth-submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-xl transition-all shadow-lg shadow-blue-600/20">确认</button>
+            </form>
+        </div>
+    </div>
 
     <main class="max-w-6xl mx-auto p-8">
         <header class="text-center mb-12">
@@ -83,66 +113,16 @@
         </div>
 
         <!-- Team Workspace Section -->
-        <div id="team-workspace" class="mb-16">
+        <div id="team-workspace" class="mb-16 hidden">
             <div class="flex justify-between items-center mb-6">
                 <h2 class="text-2xl font-bold flex items-center gap-3">
-                    <span>🏢</span> 团队调研共享库
+                    <span>🏢</span> 企业团队工作台
                 </h2>
                 <div class="flex gap-4">
                     <input id="report-search" type="text" placeholder="搜索报告..." class="bg-white/10 rounded-lg px-4 py-2 text-sm outline-none border border-white/10" oninput="fetchTeamReports()">
                 </div>
             </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <!-- Sidebar: Status -->
-                <div class="card p-6 rounded-2xl h-fit">
-                    <h3 class="text-lg font-bold mb-4 border-b border-white/10 pb-2">系统状态</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">全球节点</span>
-                            <span class="text-green-400">活跃</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">算法版本</span>
-                            <span>v2.4.0</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">公开点数</span>
-                            <span class="text-blue-400" id="user-credits-sidebar">999+</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Main: Reports Library -->
-                <div id="reports-library" class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            </div>
-        </div>
-
-            </div>
-            
-            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <!-- Sidebar: Status -->
-                <div class="card p-6 rounded-2xl h-fit">
-                    <h3 class="text-lg font-bold mb-4 border-b border-white/10 pb-2">系统状态</h3>
-                    <div class="space-y-3">
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">全球节点</span>
-                            <span class="text-green-400">活跃</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">算法版本</span>
-                            <span>v2.4.0</span>
-                        </div>
-                        <div class="flex justify-between text-sm">
-                            <span class="text-gray-400">公开点数</span>
-                            <span class="text-blue-400" id="user-credits-sidebar">999</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Main: Reports Library -->
-                <div id="reports-library" class="lg:col-span-3 grid grid-cols-1 md:grid-cols-2 gap-6"></div>
-            </div>
+            <div id="reports-library" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
         </div>
 
         <!-- Compliance Section -->
@@ -178,21 +158,98 @@
     </main>
 
     <script>
-        const FINAL_API_BASE = ""; 
+        // Production: Use relative path if hosted on same domain
+        const API_BASE = window.location.origin.includes('localhost') && !window.location.port ? "/api" : (window.location.origin + "/api");
+        
+        // Dynamic API Base logic
+        const getApiUrl = () => {
+            if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+                return "http://localhost:8000/api";
+            }
+            return "/api";
+        };
+        const FINAL_API_BASE = getApiUrl();
+        
+        let authToken = localStorage.getItem('auth_token');
+
+        function updateAuthUI() {
+            const username = localStorage.getItem('username');
+            if (authToken && username) {
+                document.getElementById('auth-links').classList.add('hidden');
+                document.getElementById('user-info').classList.remove('hidden');
+                document.getElementById('nav-username').innerText = username;
+                document.getElementById('team-workspace').classList.remove('hidden');
+                fetchUserProfile();
+                fetchTeamReports();
+            } else {
+                document.getElementById('auth-links').classList.remove('hidden');
+                document.getElementById('user-info').classList.add('hidden');
+                document.getElementById('team-workspace').classList.add('hidden');
+            }
+        }
 
         async function apiFetch(url, options = {}) {
+            const headers = options.headers || {};
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
             try {
-                const res = await fetch(url, options);
+                const res = await fetch(url, { ...options, headers });
+                if (res.status === 401 && authToken) logout();
                 return res;
             } catch (e) { throw e; }
         }
 
+        function showAuthModal(mode) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-title').innerText = mode === 'login' ? '登录智库' : '注册团队账户';
+            document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('auth-form').dataset.mode = mode;
+        }
+
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const mode = document.getElementById('auth-form').dataset.mode;
+            const username = document.getElementById('auth-username').value;
+            const password = document.getElementById('auth-password').value;
+            const companyId = document.getElementById('auth-company').value;
+
+            try {
+                if (mode === 'register') {
+                    const res = await fetch(`${FINAL_API_BASE}/auth/register?username=${username}&password=${password}&company_id=${companyId}`, { method: 'POST' });
+                    if (!res.ok) throw new Error("注册失败");
+                    alert("注册成功，请登录");
+                    showAuthModal('login');
+                } else {
+                    const formData = new FormData();
+                    formData.append('username', username);
+                    formData.append('password', password);
+                    const res = await fetch(`${FINAL_API_BASE}/auth/login`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.access_token) {
+                        authToken = data.access_token;
+                        localStorage.setItem('auth_token', authToken);
+                        localStorage.setItem('username', data.username);
+                        closeAuthModal();
+                        updateAuthUI();
+                    } else { throw new Error(data.detail || "登录失败"); }
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('username');
+            updateAuthUI();
+        }
+
         async function fetchMarket() {
             try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/market`);
+                const res = await apiFetch(`${FINAL_API_BASE}/market/summary`);
                 const data = await res.json();
                 document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change}%)`;
-                document.getElementById('fx-rates').innerText = `USD/CNY: ${data.forex[0].rate.toFixed(4)} | EUR/CNY: ${data.forex[1].rate.toFixed(4)}`;
+                document.getElementById('fx-rates').innerText = `USD/CNY: ${data.fx.USD.toFixed(4)} | EUR/CNY: ${data.fx.EUR.toFixed(4)}`;
                 document.getElementById('backend-status').innerHTML = `<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接`;
                 document.getElementById('backend-status').classList.replace('bg-red-500/20', 'bg-green-500/20');
                 document.getElementById('backend-status').classList.replace('text-red-400', 'text-green-400');
@@ -205,13 +262,14 @@
         async function runCompass() {
             const cat = document.getElementById('search-input').value;
             if (!cat) return;
+            if (!authToken) { alert("请先登录以使用智库功能"); showAuthModal('login'); return; }
             
             document.getElementById('results').classList.remove('hidden');
             document.getElementById('download-section').classList.remove('hidden');
             window.scrollTo({ top: document.getElementById('results').offsetTop - 100, behavior: 'smooth' });
 
             try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/intel?category=${cat}`);
+                const res = await apiFetch(`${FINAL_API_BASE}/intel?category=${cat}`);
                 const data = await res.json();
                 
                 const renderList = (id, list) => {
@@ -262,44 +320,30 @@
         async function fetchTeamReports() {
             const query = document.getElementById('report-search').value;
             try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/team/reports?query=${query}`);
+                const res = await apiFetch(`${FINAL_API_BASE}/team/reports?query=${query}`);
                 const data = await res.json();
                 const lib = document.getElementById('reports-library');
                 if (data.length === 0) {
-                    lib.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">暂无调研报告</div>`;
+                    lib.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500">暂无团队调研报告</div>`;
                     return;
                 }
                 lib.innerHTML = data.map(r => `
-                    <div class="card p-5 rounded-2xl flex justify-between items-center group">
-                        <div>
-                            <div class="font-bold text-blue-400 mb-1">${r.category}</div>
-                            <div class="text-[10px] text-gray-500">${r.created_at}</div>
-                        </div>
-                        <div class="flex items-center gap-4">
-                            <a href="${FINAL_API_BASE}/reports/${r.filename}" target="_blank" class="text-xl hover:scale-110 transition-transform">📄</a>
-                            <button onclick="deleteReport(${r.id})" class="text-red-500/30 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100">🗑️</button>
-                        </div>
+                    <div class="card p-5 rounded-2xl flex justify-between items-center">
+                        <div><div class="font-bold text-blue-400 mb-1">${r.category}</div><div class="text-[10px] text-gray-500">${r.created_at}</div></div>
+                        <a href="/reports/${r.filename}" target="_blank" class="text-xl">📄</a>
                     </div>`).join('');
             } catch (e) { }
-        }
-
-        async function deleteReport(id) {
-            if (!confirm("确定要从共享库中移除这篇报告吗？")) return;
-            try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/report/${id}`, { method: 'DELETE' });
-                if (res.ok) fetchTeamReports();
-            } catch (e) { alert("删除失败"); }
         }
 
         async function downloadReport() {
             const cat = document.getElementById('search-input').value;
             const btn = document.getElementById('dl-btn');
             const originalText = btn.innerText;
-            btn.innerText = "正在生成深度报告...";
+            btn.innerText = "正在生成深度报告 (消耗 1 点数)...";
             try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/report/generate?category=${cat}`);
+                const res = await apiFetch(`${FINAL_API_BASE}/report/generate?category=${cat}`);
                 if (res.status === 402) {
-                    alert("点数不足");
+                    alert("点数不足，请先充值");
                     btn.innerText = originalText;
                     return;
                 }
@@ -315,22 +359,145 @@
 
         async function fetchUserProfile() {
             try {
-                const res = await apiFetch(`${FINAL_API_BASE}/api/user/me`);
+                const res = await apiFetch(`${FINAL_API_BASE}/user/me`);
                 const data = await res.json();
                 document.getElementById('user-credits').innerText = data.credits;
-                document.getElementById('user-credits-sidebar').innerText = data.credits;
             } catch (e) { }
         }
 
-        // Initialize
-        fetchMarket();
-        fetchUserProfile();
-        fetchTeamReports();
-        setInterval(fetchMarket, 60000);
-    </script>
-</body>
-</html>
+        async function buyCredits() {
+            try {
+                const res = await apiFetch(`${FINAL_API_BASE}/payment/create-session`, { method: 'POST' });
+                const data = await res.json();
+                if (data.url) {
+                    alert("跳转至支付页面 (模拟)...");
+                    window.open(data.url, '_blank');
+                    setTimeout(async () => {
+                        const sRes = await apiFetch(`${FINAL_API_BASE}/payment/success?session_id=${data.id}`);
+                        const sData = await sRes.json();
+                        alert(sData.message);
+                        fetchUserProfile();
+                    }, 3000);
+                }
+            } catch (e) { alert("创建支付会话失败"); }
+        }
 
+        }
+
+        async function fetchUserProfile() {
+            try {
+                const res = await apiFetch(`${API_BASE}/user/me`);
+                const data = await res.json();
+                document.getElementById('user-credits').innerText = data.credits;
+            } catch (e) { }
+        }
+
+        async function buyCredits() {
+            try {
+                const res = await apiFetch(`${API_BASE}/payment/create-session`, { method: 'POST' });
+                const data = await res.json();
+                if (data.url) {
+                    alert("跳转至支付页面 (模拟)...");
+                    window.open(data.url, '_blank');
+                    // In real app, Stripe handles this. For demo, we simulate success after 2s
+                    setTimeout(async () => {
+                        const sRes = await apiFetch(`${API_BASE}/payment/success?session_id=${data.id}`);
+                        const sData = await sRes.json();
+                        alert(sData.message);
+                        fetchUserProfile();
+                    }, 3000);
+                }
+            } catch (e) { alert("创建支付会话失败"); }
+        }
+
+        async function apiFetch(url, options = {}) {
+            const headers = options.headers || {};
+            if (authToken) headers['Authorization'] = `Bearer ${authToken}`;
+            try {
+                const res = await fetch(url, { ...options, headers });
+                if (res.status === 401 && authToken) logout();
+                return res;
+            } catch (e) { throw e; }
+        }
+
+        function showAuthModal(mode) {
+            document.getElementById('auth-modal').classList.remove('hidden');
+            document.getElementById('auth-title').innerText = mode === 'login' ? '登录智库' : '注册团队账户';
+            document.getElementById('register-fields').classList.toggle('hidden', mode === 'login');
+            document.getElementById('auth-form').dataset.mode = mode;
+        }
+
+        function closeAuthModal() { document.getElementById('auth-modal').classList.add('hidden'); }
+
+        async function handleAuth(e) {
+            e.preventDefault();
+            const mode = document.getElementById('auth-form').dataset.mode;
+            const username = document.getElementById('auth-username').value;
+            const password = document.getElementById('auth-password').value;
+            const companyId = document.getElementById('auth-company').value;
+
+            try {
+                if (mode === 'register') {
+                    const res = await fetch(`${API_BASE}/auth/register?username=${username}&password=${password}&company_id=${companyId}`, { method: 'POST' });
+                    if (!res.ok) throw new Error("注册失败");
+                    alert("注册成功，请登录");
+                    showAuthModal('login');
+                } else {
+                    const formData = new FormData();
+                    formData.append('username', username);
+                    formData.append('password', password);
+                    const res = await fetch(`${API_BASE}/auth/login`, { method: 'POST', body: formData });
+                    const data = await res.json();
+                    if (data.access_token) {
+                        authToken = data.access_token;
+                        localStorage.setItem('auth_token', authToken);
+                        localStorage.setItem('username', data.username);
+                        closeAuthModal();
+                        updateAuthUI();
+                    } else { throw new Error(data.detail || "登录失败"); }
+                }
+            } catch (err) { alert(err.message); }
+        }
+
+        function logout() {
+            authToken = null;
+            localStorage.removeItem('auth_token');
+            localStorage.removeItem('username');
+            updateAuthUI();
+        }
+
+        async function fetchMarket() {
+            try {
+                const res = await apiFetch(`${API_BASE}/market/summary`);
+                const data = await res.json();
+                document.getElementById('gold-price').innerText = `伦敦金: $${data.gold.price} (${data.gold.change}%)`;
+                document.getElementById('fx-rates').innerText = `USD/CNY: ${data.fx.USD.toFixed(4)} | EUR/CNY: ${data.fx.EUR.toFixed(4)}`;
+                document.getElementById('backend-status').innerHTML = `<span class="w-1.5 h-1.5 bg-green-500 rounded-full"></span> 智库已连接`;
+                document.getElementById('backend-status').classList.replace('bg-red-500/20', 'bg-green-500/20');
+                document.getElementById('backend-status').classList.replace('text-red-400', 'text-green-400');
+            } catch (e) {
+                document.getElementById('gold-price').innerText = "伦敦金: $4,522.57 (Demo)";
+                document.getElementById('fx-rates').innerText = "USD/CNY: 6.7657 | EUR/CNY: 7.3421 (Demo)";
+            }
+        }
+
+        async function runCompass() {
+            const cat = document.getElementById('search-input').value;
+            if (!cat) return;
+            if (!authToken) { alert("请先登录以使用智库功能"); showAuthModal('login'); return; }
+            
+            document.getElementById('results').classList.remove('hidden');
+            document.getElementById('download-section').classList.remove('hidden');
+            window.scrollTo({ top: document.getElementById('results').offsetTop - 100, behavior: 'smooth' });
+
+            try {
+                const res = await apiFetch(`${API_BASE}/intel?category=${cat}`);
+                const data = await res.json();
+                
+                const renderList = (id, list) => {
+                    document.getElementById(id).innerHTML = list.map(c => `
+                        <div class="card p-4 rounded-xl">
+                            <div class="font-bold text-lg">${c.name}</div>
                             <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
                         </div>
                     `).join('');

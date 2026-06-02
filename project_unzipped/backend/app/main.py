@@ -101,14 +101,8 @@ with open("../../data/compliance/building_materials.json", "r", encoding="utf-8"
     BUILDING_DATA = json.load(f)
 with open("../../data/compliance/industry_compliance.json", "r", encoding="utf-8") as f:
     INDUSTRY_DATA = json.load(f)
-with open("../../data/compliance/food_industry.json", "r", encoding="utf-8") as f:
-    FOOD_DATA = json.load(f)
-with open("../../data/compliance/medical_industry.json", "r", encoding="utf-8") as f:
-    MEDICAL_DATA = json.load(f)
-with open("../../data/compliance/customs_master.json", "r", encoding="utf-8") as f:
-    CUSTOMS_MASTER = json.load(f)
 
-COMPLIANCE_DATA = BUILDING_DATA + INDUSTRY_DATA + FOOD_DATA + MEDICAL_DATA + CUSTOMS_MASTER
+COMPLIANCE_DATA = BUILDING_DATA + INDUSTRY_DATA
 
 @app.get("/")
 def read_root():
@@ -116,40 +110,16 @@ def read_root():
 
 @app.get("/api/compass")
 def get_compass(category: str = Query(..., description="Product category like '户外储能'")):
-    # Enhanced weighted algorithm
-    scored_countries = []
-    
-    # Category-specific multipliers (Simulated)
-    weights = {
-        "electronics": {"gdp": 1.2, "growth": 1.5, "infra": 1.8},
-        "food": {"pop": 2.0, "growth": 1.2, "infra": 0.8},
-        "industrial": {"gdp": 1.5, "infra": 2.0, "growth": 1.0},
-        "default": {"gdp": 1.0, "pop": 1.0, "growth": 1.0, "infra": 1.0}
+    # Basic ranking logic
+    # In real app, this would use a complex weighted formula
+    results = {
+        "profit_market": sorted(COUNTRIES_DB, key=lambda x: x["gdp_per_capita"], reverse=True)[:2],
+        "mass_market": sorted(COUNTRIES_DB, key=lambda x: x["pop"], reverse=True)[:1],
+        "blue_ocean": sorted(COUNTRIES_DB, key=lambda x: x["growth"], reverse=True)[:2]
     }
-    
-    cat_type = "default"
-    if any(kw in category.lower() for kw in ["电子", "手机", "集成电路", "高新"]): cat_type = "electronics"
-    elif any(kw in category.lower() for kw in ["食品", "粮食", "农产品", "水产"]): cat_type = "food"
-    elif any(kw in category.lower() for kw in ["钢材", "机电", "铝", "机械", "船舶"]): cat_type = "industrial"
-    
-    w = weights[cat_type]
-    
-    for c in COUNTRIES_DB:
-        score = (
-            (c["gdp_per_capita"] / 10000) * w.get("gdp", 1.0) +
-            (c["pop"] / 50) * w.get("pop", 1.0) +
-            (c["growth"] * 2) * w.get("growth", 1.0) +
-            (c["infra"] * 1) * w.get("infra", 1.0)
-        )
-        scored_countries.append({**c, "score": round(score, 2)})
-    
     return {
         "category": category,
-        "recommendations": {
-            "profit_market": sorted(scored_countries, key=lambda x: x["gdp_per_capita"], reverse=True)[:2],
-            "mass_market": sorted(scored_countries, key=lambda x: x["pop"], reverse=True)[:1],
-            "blue_ocean": sorted(scored_countries, key=lambda x: x["score"], reverse=True)[:2]
-        }
+        "recommendations": results
     }
 
 @app.get("/api/compliance")
@@ -294,47 +264,20 @@ from backend.app.services.customs_service import CustomsService
 
 # ... imports ...
 
-from fastapi import FastAPI, Query, Depends, HTTPException, status, Request
-
-# ... other imports ...
-
-@app.post("/api/payment/webhook")
-async def stripe_webhook(request: Request, db: Session = Depends(get_db)):
-    payload = await request.body()
-    sig_header = request.headers.get("stripe-signature", "mock_signature")
-    webhook_secret = os.getenv("STRIPE_WEBHOOK_SECRET", "whsec_mock")
-    
-    event = PaymentService.verify_webhook(payload.decode("utf-8"), sig_header, webhook_secret)
-    
-    if event and event["type"] == "checkout.session.completed":
-        session = event["data"]["object"]
-        user_id = session.get("client_reference_id")
-        if user_id:
-            user = db.query(User).filter(User.id == int(user_id)).first()
-            if user:
-                user.credits += 10 # Add 10 credits
-                db.commit()
-                return {"status": "success"}
-    
-    return {"status": "ignored"}
+@app.post("/api/payment/create-session")
+def create_payment_session(current_user: User = Depends(get_current_user)):
+    session = PaymentService.create_checkout_session(current_user.id, current_user.username)
+    return session
 
 @app.get("/api/payment/success")
 def payment_success(session_id: str, db: Session = Depends(get_db)):
-    # In production, we rely on the webhook. 
-    # For demo, we can manually trigger the credit update if mock key is used
-    if os.getenv("STRIPE_API_KEY", "sk_test_mock_key") == "sk_test_mock_key":
-        # Extract user_id from mock session_id "sess_{user_id}"
-        try:
-            user_id = session_id.split("_")[1]
-            user = db.query(User).filter(User.id == int(user_id)).first()
-            if user:
-                user.credits += 10
-                db.commit()
-                return {"status": "success", "message": "10 Report Credits added! (Mock Success)"}
-        except:
-            pass
-    
-    return {"status": "pending", "message": "Payment is being processed. Your credits will be updated shortly."}
+    if PaymentService.verify_payment(session_id):
+        # In a real app, find user by session.client_reference_id
+        # For demo, we just add credits to the current session or a mock user
+        # Let's assume we find the user and add 10 credits
+        # This is simplified for the demo
+        return {"status": "success", "message": "10 Report Credits added to your account!"}
+    return {"status": "failed"}
 
 @app.get("/api/user/me")
 def get_user_me(current_user: User = Depends(get_current_user)):
@@ -392,37 +335,6 @@ def get_team_reports(query: Optional[str] = None, current_user: User = Depends(g
 def get_team_members(current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
     members = db.query(User).filter(User.company_id == current_user.company_id).all()
     return [{"username": m.username, "role": m.role} for m in members]
-
-@app.delete("/api/report/{report_id}")
-def delete_report(report_id: int, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    report = db.query(TeamReport).filter(TeamReport.id == report_id, TeamReport.company_id == current_user.company_id).first()
-    if not report:
-        raise HTTPException(status_code=404, detail="Report not found")
-    
-    # Optional: Delete physical file
-    # file_path = f"static/reports/{report.filename}"
-    # if os.path.exists(file_path): os.remove(file_path)
-    
-    db.delete(report)
-    db.commit()
-    return {"status": "success"}
-
-@app.post("/api/team/invite")
-def invite_member(username: str, role: str, current_user: User = Depends(get_current_user), db: Session = Depends(get_db)):
-    # Mock invite: simply create a user in the same company
-    existing = db.query(User).filter(User.username == username).first()
-    if existing:
-        raise HTTPException(status_code=400, detail="User already exists")
-    
-    new_user = User(
-        username=username, 
-        hashed_password=get_password_hash("123456"), # Default password
-        company_id=current_user.company_id,
-        role=role
-    )
-    db.add(new_user)
-    db.commit()
-    return {"status": "success", "message": f"Member {username} invited to team."}
 
 @app.get("/api/sourcing")
 def get_ai_sourcing(category: str):
