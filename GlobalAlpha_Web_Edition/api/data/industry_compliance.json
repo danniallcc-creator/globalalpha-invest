@@ -1,0 +1,38 @@
+[
+  {
+    "category": "电子消费品 (Electronics)",
+    "direct_export": "部分",
+    "reason": "强电产品需电气安全认证；射频产品需频率合规。",
+    "transformable": true,
+    "breakthrough": "认证对标与无线化：适配当地插头，通过 FCC/CE 认证。",
+    "case": "某蓝牙耳机品牌：通过获得 FCC ID (美国) 和 CE-RED (欧洲) 认证，并适配 Type-C 快充，成功打入全球主流卖场。",
+    "suggestion": "美国市场必须有 FCC；欧洲市场需 CE-LVD 和 EMC；日本市场需 PSE 和 TELEC。"
+  },
+  {
+    "category": "母婴与玩具 (Maternal & Child)",
+    "direct_export": false,
+    "reason": "极高的物理安全与化学成分要求。美国 CPC 和欧洲 EN71 是硬门槛。",
+    "transformable": true,
+    "breakthrough": "材料去毒化与设计安全：确保无小零件脱落，材料符合食品级接触标准。",
+    "case": "某硅胶餐具厂：通过 FDA 认证和 LFGB (德国) 测试，并重新设计包装为极简北欧风，客单价在亚马逊提升了 300%。",
+    "suggestion": "美国市场必须有 CPC (Children's Product Certificate)；欧盟需 EN71 1/2/3 测试报告。"
+  },
+  {
+    "category": "服装纺织 (Clothing)",
+    "direct_export": true,
+    "reason": "门槛相对低，但标签法与环保检测（REACH）日益严格。",
+    "transformable": true,
+    "breakthrough": "绿色供应链：采用再生纤维或 OEKO-TEX 认证材料，主打环保可持续。",
+    "case": "某内衣品牌：通过建立可追溯的棉花供应链，满足欧盟绿色新政要求，成功规避了部分非关税壁垒。",
+    "suggestion": "标签必须包含当地语言、成分占比及洗涤说明；欧盟市场需关注 REACH 限制物质。"
+  },
+  {
+    "category": "新能源产品 (New Energy)",
+    "direct_export": false,
+    "reason": "特种设备安全与电网接入标准极其复杂（如 UL 1741）。",
+    "transformable": true,
+    "breakthrough": "系统化认证与售后：不仅卖硬件，要提供本地化的安装指导与认证证书。",
+    "case": "某光伏逆变器厂家：通过与当地电力服务商合作进行并网测试，获得意大利 CEI 0-21 认证，成功进入欧洲政府补贴名录。",
+    "suggestion": "北美需 UL 1741；澳洲需 SAA 和 Clean Energy Council (CEC) 列表；欧洲需 CE-EMC/LVD。"
+  }
+]

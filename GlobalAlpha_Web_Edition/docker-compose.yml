@@ -1,0 +1,11 @@
+services:
+  globalalpha-web:
+    build: .
+    ports:
+      - "80:8000"
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=sqlite:///./cross_border.db
+      - STRIPE_API_KEY=sk_test_mock_key
+    restart: always
