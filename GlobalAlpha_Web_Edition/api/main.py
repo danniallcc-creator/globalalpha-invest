@@ -33,6 +33,20 @@ app = FastAPI(title="GlobalAlpha Web Edition")
 @app.on_event("startup")
 def startup():
     init_db()
+    # Ensure PublicGuest exists for Web Edition
+    db = SessionLocal()
+    guest = db.query(User).filter(User.username == "PublicGuest").first()
+    if not guest:
+        guest = User(
+            username="PublicGuest", 
+            hashed_password=get_password_hash("guest_pwd"), 
+            company_id=999,
+            role="Admin",
+            credits=999
+        )
+        db.add(guest)
+        db.commit()
+    db.close()
 
 # Dependency to get DB session
 def get_db():
@@ -46,6 +60,7 @@ async def get_current_user(db: Session = Depends(get_db)):
     # Web Edition: No Auth required, always return the PublicGuest
     user = db.query(User).filter(User.username == "PublicGuest").first()
     return user
+
 
 def create_access_token(data: dict):
     to_encode = data.copy()
