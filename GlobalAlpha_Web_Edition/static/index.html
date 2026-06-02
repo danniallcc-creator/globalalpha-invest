@@ -212,31 +212,113 @@
 
             try {
                 const res = await apiFetch(`${FINAL_API_BASE}/api/intel?category=${cat}`);
+                if (!res.ok) throw new Error("Backend offline");
                 const data = await res.json();
-                
-                const renderList = (id, list) => {
-                    document.getElementById(id).innerHTML = list.map(c => `
-                        <div class="card p-4 rounded-xl">
-                            <div class="font-bold text-lg">${c.name}</div>
-                            <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
-                        </div>
-                    `).join('');
-                };
-                renderList('profit-list', data.recommendations.profit_market);
-                renderList('mass-list', data.recommendations.mass_market);
-                renderList('blue-list', data.recommendations.blue_ocean);
+                renderIntel(data);
+            } catch (e) {
+                console.log("Using Local Intelligence Mode (Standalone)...");
+                runStandaloneCompass(cat);
+            }
+        }
 
-                if (data.compliance_info.length > 0) {
-                    document.getElementById('compliance-section').classList.remove('hidden');
-                    const item = data.compliance_info[0];
-                    document.getElementById('compliance-content').innerHTML = `
-                        <div class="border-r border-white/10 pr-8">
-                            <h3 class="text-blue-400 font-bold mb-2">准入红线</h3><p class="text-gray-300 text-sm">${item.reason}</p>
-                        </div>
-                        <div>
-                            <h3 class="text-green-400 font-bold mb-2">转型锦囊</h3><p class="text-gray-300 text-sm italic">${item.suggestion}</p>
-                        </div>`;
+        const STATIC_COUNTRIES = [
+            {"name": "美国", "gdp_per_capita": 76000, "pop": 332, "growth": 2.1, "infra": 9},
+            {"name": "德国", "gdp_per_capita": 51000, "pop": 83, "growth": 1.5, "infra": 9},
+            {"name": "澳大利亚", "gdp_per_capita": 65000, "pop": 26, "growth": 2.5, "infra": 8},
+            {"name": "巴西", "gdp_per_capita": 9000, "pop": 214, "growth": 4.5, "infra": 6},
+            {"name": "越南", "gdp_per_capita": 4100, "pop": 98, "growth": 6.2, "infra": 5}
+        ];
+
+        async function runStandaloneCompass(category) {
+            // Load Local Data
+            let complianceData = [];
+            try {
+                const res = await fetch(`${FINAL_API_BASE}/data/compliance/customs_master.json`);
+                complianceData = await res.json();
+            } catch (e) {
+                // Fallback hardcoded samples if JSON fetch fails
+                complianceData = [
+                    {"category": "户外储能", "restriction": "需符合 UN 38.3, UL 2743 等安全标准。", "reason": "涉及锂电池运输及用电安全。", "suggestion": "通过关键认证并建立本地售后体系。", "breakthrough": "深耕露营经济与家庭备用电源场景。"}
+                ];
+            }
+
+            const matchedCompliance = complianceData.filter(item => 
+                category.split('').some(char => item.category.includes(char)) || 
+                item.category.includes(category)
+            );
+
+            // Mock Weighted Ranking logic
+            const scored = STATIC_COUNTRIES.map(c => {
+                let score = (c.gdp_per_capita / 10000) + (c.pop / 50) + (c.growth * 2);
+                return {...c, score: score.toFixed(2)};
+            });
+
+            const data = {
+                recommendations: {
+                    profit_market: scored.sort((a,b) => b.gdp_per_capita - a.gdp_per_capita).slice(0, 2),
+                    mass_market: scored.sort((a,b) => b.pop - a.pop).slice(0, 1),
+                    blue_ocean: scored.sort((a,b) => b.score - a.score).slice(0, 2)
+                },
+                compliance_info: matchedCompliance,
+                pricing_analysis: {
+                    "北美": {currency: "USD", mid_range: "299-899", top_products: [{name: "EcoFlow Delta", price: 899}, {name: "Jackery 500", price: 499}]},
+                    "欧洲": {currency: "EUR", mid_range: "250-750", top_products: [{name: "Bluetti EB3A", price: 299}]}
+                },
+                customs_stats: {
+                    hs_code: "850760",
+                    export_volume_yoy: "+12.5%",
+                    risk_alerts: ["欧盟电池法案更新", "美国 301 关税波动"],
+                    tariffs: {USA: "25%", EU: "2.7%"}
                 }
+            };
+            renderIntel(data);
+        }
+
+        function renderIntel(data) {
+            const renderList = (id, list) => {
+                document.getElementById(id).innerHTML = list.map(c => `
+                    <div class="card p-4 rounded-xl">
+                        <div class="font-bold text-lg">${c.name}</div>
+                        <p class="text-sm text-gray-400 mt-1">GDP: $${(c.gdp_per_capita/1000).toFixed(1)}k | 增速: ${c.growth}%</p>
+                    </div>
+                `).join('');
+            };
+            renderList('profit-list', data.recommendations.profit_market);
+            renderList('mass-list', data.recommendations.mass_market);
+            renderList('blue-list', data.recommendations.blue_ocean);
+
+            if (data.compliance_info.length > 0) {
+                document.getElementById('compliance-section').classList.remove('hidden');
+                const item = data.compliance_info[0];
+                document.getElementById('compliance-content').innerHTML = `
+                    <div class="border-r border-white/10 pr-8">
+                        <h3 class="text-blue-400 font-bold mb-2">准入红线</h3><p class="text-gray-300 text-sm">${item.reason}</p>
+                    </div>
+                    <div>
+                        <h3 class="text-green-400 font-bold mb-2">转型锦囊</h3><p class="text-gray-300 text-sm italic">${item.suggestion}</p>
+                    </div>`;
+            }
+
+            document.getElementById('pricing-section').classList.remove('hidden');
+            document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
+                <div class="card p-5 rounded-2xl">
+                    <div class="text-xs text-blue-400 font-bold mb-2 uppercase">${region}</div>
+                    <div class="text-2xl font-bold mb-4">${info.currency} ${info.mid_range}</div>
+                    <div class="space-y-2 text-xs text-gray-400">
+                        ${info.top_products.map(p => `<div>• ${p.name} (${info.currency}${p.price})</div>`).join('')}
+                    </div>
+                </div>`).join('');
+
+            document.getElementById('customs-section').classList.remove('hidden');
+            const c = data.customs_stats;
+            document.getElementById('customs-content').innerHTML = `
+                <div><h3 class="text-gray-400 text-sm mb-1">HS Code</h3><div class="text-2xl font-bold">${c.hs_code}</div><div class="text-xs text-green-400 mt-2">出口额同比: ${c.export_volume_yoy}</div></div>
+                <div class="border-x border-white/10 px-8"><h3 class="text-gray-400 text-sm mb-1">风险预警</h3><div class="text-[10px] text-red-400">${c.risk_alerts.join('<br>')}</div></div>
+                <div><h3 class="text-gray-400 text-sm mb-1">关税概览</h3><div class="text-[11px]">美国: ${c.tariffs.USA}<br>欧盟: ${c.tariffs.EU}</div></div>`;
+            
+            fetchTeamReports();
+        }
+
 
                 document.getElementById('pricing-section').classList.remove('hidden');
                 document.getElementById('pricing-grid').innerHTML = Object.entries(data.pricing_analysis).map(([region, info]) => `
